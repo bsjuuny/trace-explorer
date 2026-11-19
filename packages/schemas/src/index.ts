@@ -106,6 +106,8 @@ export const Place = z.object({
     })
     .nullable()
     .default(null),
+  /** 선택: 탐험 중 "추가 힌트" 버튼에 보여줄 장소별 힌트(목적지 이름을 직접 말하지 않는 문장). 공개 필드 */
+  extraHint: z.string().trim().min(1).max(120).optional(),
   /** 공개 금지: 관리자 메모 */
   adminNote: z.string().optional(),
 });

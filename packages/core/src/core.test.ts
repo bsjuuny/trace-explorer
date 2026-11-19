@@ -240,3 +240,20 @@ describe("restoreProgress", () => {
     expect(Object.keys(restoreProgress(raw).dex)).toEqual([]);
   });
 });
+
+import { Place as PlaceSchema } from "@trace/schemas";
+describe("장소 추가 힌트", () => {
+  const base = demoBundle.places[0]!;
+  it("선택 필드이며 120자를 넘기면 거부", () => {
+    expect(PlaceSchema.safeParse(base).success).toBe(true);
+    expect(PlaceSchema.safeParse({ ...base, extraHint: "문 앞 화분을 찾아보세요." }).success).toBe(true);
+    expect(PlaceSchema.safeParse({ ...base, extraHint: "가".repeat(121) }).success).toBe(false);
+    expect(PlaceSchema.safeParse({ ...base, extraHint: "   " }).success).toBe(false);
+  });
+  it("데모 장소는 모두 힌트가 있고 이름을 직접 말하지 않음", () => {
+    for (const p of demoBundle.places) {
+      expect(p.extraHint, p.id).toBeTruthy();
+      expect(p.extraHint!.includes(p.name.replace("[데모] ", "")), p.id).toBe(false);
+    }
+  });
+});

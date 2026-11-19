@@ -63,7 +63,7 @@ export function MissionScreen() {
       </ol>
       {session.extraHint && (
         <p className="rounded-xl bg-[#edf7ef] p-3 text-sm" role="status">
-          추가 힌트: {kindLabel ? `${kindLabel} 종류의 장소이고, ` : ""}출발점에서 걸어서 약 {session.selected.estimatedTravelMinutes}분 거리예요.
+          추가 힌트: {session.place.extraHint ?? (kindLabel ? `${kindLabel} 종류의 장소예요.` : "")} 출발점에서 걸어서 약 {session.selected.estimatedTravelMinutes}분 거리예요.
         </p>
       )}
 

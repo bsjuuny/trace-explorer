@@ -100,6 +100,7 @@ export function PlacesTab({ bundle, setBundle }: Props) {
               <F label="최종 확인일(ISO)"><input value={sel.source.lastCheckedAt ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, source: { ...p.source, lastCheckedAt: e.target.value || null } }))} /></F>
               <F label="만료일(ISO)"><input value={sel.source.expiresAt ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, source: { ...p.source, expiresAt: e.target.value || null } }))} /></F>
             </div>
+            <F label="추가 힌트(공개, 최대 120자 · 목적지 이름을 직접 말하지 않기)"><input maxLength={120} value={sel.extraHint ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, extraHint: e.target.value === "" ? undefined : e.target.value }))} /></F>
             <F label="관리자 메모(공개 번들에서 제외됨)"><input value={sel.adminNote ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, adminNote: e.target.value }))} /></F>
             <button className="btn danger" onClick={() => { setBundle({ ...bundle, places: bundle.places.filter((p) => p.id !== sel.id) }); setSelId(null); }}>이 장소 삭제</button>
           </div>

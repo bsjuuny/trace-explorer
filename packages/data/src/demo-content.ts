@@ -13,7 +13,7 @@ const source = {
 
 type PlaceSeed = {
   id: string; name: string; lat: number; lng: number; categories: string[]; tags: string[];
-  policy: string; walk: number | null; radius?: number;
+  policy: string; walk: number | null; radius?: number; hint?: string;
 };
 
 const mkPlace = (p: PlaceSeed) => ({
@@ -26,6 +26,7 @@ const mkPlace = (p: PlaceSeed) => ({
   accessPolicyId: p.policy,
   checkInPolicy: { radiusMeters: p.radius ?? 60, maxAccuracyMeters: 80 },
   missionTemplateIds: ["mystery-discovery-v1"],
+  ...(p.hint ? { extraHint: p.hint } : {}),
   walkEstimate: p.walk === null ? null : { minutes: p.walk, confidence: "approximate" as const },
 });
 
@@ -69,14 +70,14 @@ export const demoContent = {
     { id: "reservation-only", closedDays: [], windows: [{ days: all, open: "10:00", close: "18:00", lastEntryMinutesBeforeClose: 0, mode: "reservation-required" as const }], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: false, estimatedStayMinutes: 3, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
   ],
   places: [
-    mkPlace({ id: "demo-bakery-001", name: "골목의 작은 빵집", lat: 37.5712, lng: 126.9992, categories: ["bakery", "cafe"], tags: ["bread", "local"], policy: "daily-day", walk: 4 }),
-    mkPlace({ id: "demo-cafe-002", name: "시장 옆 카페", lat: 37.5703, lng: 126.9981, categories: ["cafe"], tags: ["coffee"], policy: "closed-monday", walk: 4 }),
-    mkPlace({ id: "demo-restaurant-003", name: "골목 안쪽 식당", lat: 37.5718, lng: 127.0001, categories: ["restaurant"], tags: ["soup"], policy: "daily-day", walk: 4 }),
-    mkPlace({ id: "demo-bar-004", name: "심야 식당", lat: 37.5707, lng: 126.9996, categories: ["restaurant"], tags: ["night"], policy: "late-night", walk: 4 }),
-    mkPlace({ id: "demo-heritage-005", name: "고궁형 유산지", lat: 37.5726, lng: 126.9971, categories: ["heritage"], tags: ["heritage", "history"], policy: "heritage-jongmyo-style", walk: 7, radius: 100 }),
-    mkPlace({ id: "demo-alley-006", name: "이야기 골목", lat: 37.5714, lng: 126.9979, categories: ["alley"], tags: ["walk", "street"], policy: "outdoor-public", walk: 3 }),
-    mkPlace({ id: "demo-museum-007", name: "예약제 작은 전시", lat: 37.5699, lng: 126.9990, categories: ["heritage"], tags: ["exhibit"], policy: "reservation-only", walk: 4 }),
-    mkPlace({ id: "demo-far-008", name: "먼 곳의 정원", lat: 37.5800, lng: 127.0100, categories: ["park"], tags: ["park"], policy: "outdoor-public", walk: null }),
+    mkPlace({ id: "demo-bakery-001", name: "골목의 작은 빵집", lat: 37.5712, lng: 126.9992, categories: ["bakery", "cafe"], tags: ["bread", "local"], policy: "daily-day", walk: 4, hint: "간판 대신 나무 문패가 걸려 있고, 오전에 향이 가장 진해요." }),
+    mkPlace({ id: "demo-cafe-002", name: "시장 옆 카페", lat: 37.5703, lng: 126.9981, categories: ["cafe"], tags: ["coffee"], policy: "closed-monday", walk: 4, hint: "시장 입구에서 한 블록, 창가에 작은 화분이 줄지어 있어요." }),
+    mkPlace({ id: "demo-restaurant-003", name: "골목 안쪽 식당", lat: 37.5718, lng: 127.0001, categories: ["restaurant"], tags: ["soup"], policy: "daily-day", walk: 4, hint: "점심 직전이면 골목 입구까지 김이 새어 나와요." }),
+    mkPlace({ id: "demo-bar-004", name: "심야 식당", lat: 37.5707, lng: 126.9996, categories: ["restaurant"], tags: ["night"], policy: "late-night", walk: 4, hint: "낮에는 닫힌 셔터만 보여요. 저녁 이후를 떠올려 보세요." }),
+    mkPlace({ id: "demo-heritage-005", name: "고궁형 유산지", lat: 37.5726, lng: 126.9971, categories: ["heritage"], tags: ["heritage", "history"], policy: "heritage-jongmyo-style", walk: 7, radius: 100, hint: "정문을 마주 보고 오른쪽 돌담을 따라가 보세요." }),
+    mkPlace({ id: "demo-alley-006", name: "이야기 골목", lat: 37.5714, lng: 126.9979, categories: ["alley"], tags: ["walk", "street"], policy: "outdoor-public", walk: 3, hint: "자동차가 들어갈 수 없을 만큼 좁아요. 벽을 눈높이로 살펴보세요." }),
+    mkPlace({ id: "demo-museum-007", name: "예약제 작은 전시", lat: 37.5699, lng: 126.9990, categories: ["heritage"], tags: ["exhibit"], policy: "reservation-only", walk: 4, hint: "문 앞 안내판의 예약 문구를 먼저 읽어 보세요." }),
+    mkPlace({ id: "demo-far-008", name: "먼 곳의 정원", lat: 37.5800, lng: 127.0100, categories: ["park"], tags: ["park"], policy: "outdoor-public", walk: null, hint: "걸어서는 꽤 멀어요. 이번 코스 밖일 수 있어요." }),
   ],
   missions: [
     mkMission("demo-bakery-001", "bread", ["문 앞에 밀가루 향이 번지는 작은 가게", "아침마다 줄이 생기는 골목", "간판에 곡식 그림이 있다"]),

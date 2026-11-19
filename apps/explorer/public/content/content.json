@@ -47,7 +47,8 @@
       "walkEstimate": {
         "minutes": 4,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "간판 대신 나무 문패가 걸려 있고, 오전에 향이 가장 진해요."
     },
     {
       "schemaVersion": 1,
@@ -91,7 +92,8 @@
       "walkEstimate": {
         "minutes": 4,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "시장 입구에서 한 블록, 창가에 작은 화분이 줄지어 있어요."
     },
     {
       "schemaVersion": 1,
@@ -135,7 +137,8 @@
       "walkEstimate": {
         "minutes": 4,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "점심 직전이면 골목 입구까지 김이 새어 나와요."
     },
     {
       "schemaVersion": 1,
@@ -179,7 +182,8 @@
       "walkEstimate": {
         "minutes": 4,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "낮에는 닫힌 셔터만 보여요. 저녁 이후를 떠올려 보세요."
     },
     {
       "schemaVersion": 1,
@@ -224,7 +228,8 @@
       "walkEstimate": {
         "minutes": 7,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "정문을 마주 보고 오른쪽 돌담을 따라가 보세요."
     },
     {
       "schemaVersion": 1,
@@ -269,7 +274,8 @@
       "walkEstimate": {
         "minutes": 3,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "자동차가 들어갈 수 없을 만큼 좁아요. 벽을 눈높이로 살펴보세요."
     },
     {
       "schemaVersion": 1,
@@ -313,7 +319,8 @@
       "walkEstimate": {
         "minutes": 4,
         "confidence": "approximate"
-      }
+      },
+      "extraHint": "문 앞 안내판의 예약 문구를 먼저 읽어 보세요."
     },
     {
       "schemaVersion": 1,
@@ -354,7 +361,8 @@
       "missionTemplateIds": [
         "mystery-discovery-v1"
       ],
-      "walkEstimate": null
+      "walkEstimate": null,
+      "extraHint": "걸어서는 꽤 멀어요. 이번 코스 밖일 수 있어요."
     }
   ],
   "accessPolicies": [

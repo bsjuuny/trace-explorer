@@ -72,6 +72,8 @@ export function validateBundle(raw: unknown, opts: ValidateOptions): { issues: I
       if (!p.source.lastCheckedAt || !p.source.expiresAt) err(at, "확인일·만료일 필수");
       if (!p.source.license) err(at, "라이선스/권리 정보 필수");
       if (p.adminNote !== undefined) err(at, "금지 필드 포함: adminNote");
+      if (!p.extraHint) warn(at, "추가 힌트 없음(분류·도보 시간만 보여줌)");
+      else if (p.name && p.extraHint.includes(p.name)) err(at, "추가 힌트에 장소 이름이 포함됨");
     }
     for (const m of b.missions) {
       if (!m.reviewed || !m.safetyReviewed || m.clues.some((c) => !c.reviewed)) {
