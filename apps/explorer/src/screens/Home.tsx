@@ -1,13 +1,15 @@
+import { getArea, SERVICE_AREAS } from "@trace/core";
 import { suggestionMessage } from "../lib/messages";
 import { navigate } from "../router";
 import { useApp } from "../store";
 
 export function HomeScreen() {
-  const { bundle, contentError, options, setOptions, origin, gpsMessage, lastNone, session, consent } = useApp();
+  const { bundle, contentError, options, setOptions, origin, gpsMessage, lastNone, session, consent, areaId } = useApp();
   const startMystery = useApp((s) => s.startMystery);
   const useMyLocation = useApp((s) => s.useMyLocation);
   const useManualOrigin = useApp((s) => s.useManualOrigin);
   const setLocationConsent = useApp((s) => s.setLocationConsent);
+  const setArea = useApp((s) => s.setArea);
 
   if (contentError) {
     return (
@@ -73,14 +75,22 @@ export function HomeScreen() {
       </label>
 
       <div className="rounded-xl bg-white p-3 text-sm">
-        <p>출발점: {origin.kind === "gps" ? "내 위치" : "종로5가역(수동 선택)"}</p>
+        <label className="mb-2 flex items-center gap-2">
+          <span className="font-semibold">출발 지역</span>
+          <select className="min-h-[44px] flex-1 rounded-lg border border-[#c9d8cd] bg-white px-2" value={areaId} onChange={(e) => setArea(e.target.value)} aria-label="출발 지역">
+            {SERVICE_AREAS.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}{a.approximate ? " (임시 좌표)" : ""}</option>
+            ))}
+          </select>
+        </label>
+        <p>출발점: {origin.kind === "gps" ? "내 위치" : `${getArea(areaId).name}(수동 선택)`}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <button className="min-h-[44px] rounded-lg bg-[#e2efe6] px-3 font-semibold text-[#1d5e3e]" onClick={() => void useMyLocation()}>
             내 위치로 탐험
           </button>
           {origin.kind === "gps" && (
             <button className="min-h-[44px] rounded-lg bg-[#e2efe6] px-3 font-semibold text-[#1d5e3e]" onClick={useManualOrigin}>
-              종로5가역에서 시작
+              {getArea(areaId).name}에서 시작
             </button>
           )}
         </div>

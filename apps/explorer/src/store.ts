@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import {
-  acquireFix, applyCompletion, emptyProgress, restoreProgress, evaluateCheckIn, generateMystery, haversineMeters, JONGNO5GA_STATION,
+  acquireFix, applyCompletion, emptyProgress, restoreProgress, evaluateCheckIn, generateMystery, getArea, haversineMeters, nearestArea, DEFAULT_AREA_ID, SERVICE_AREAS,
   type CheckInReason, type MysteryMeta, type ProgressState,
 } from "@trace/core";
 import type { ContentBundle, Mission, MissionCandidate, MysteryRequest, Place } from "@trace/schemas";
@@ -8,7 +8,7 @@ import { loadContent } from "./lib/content";
 import { CONSENT_VERSION } from "./lib/legal";
 import { kvDelete, kvGet, kvSet, kvSetMany, wipeAll } from "./lib/storage";
 
-/** 이 거리보다 멀면 내 위치를 출발점으로 쓰지 않는다(시범 지역은 종로5가 도보권). */
+/** 어느 서비스 지역에서도 이 거리보다 멀면 내 위치를 출발점으로 쓰지 않는다(시범 지역은 각 지역 도보권). */
 const FAR_FROM_SERVICE_AREA_M = 3000;
 
 export type Consent = {
@@ -46,6 +46,8 @@ type State = {
   consent: Consent | null;
   progress: ProgressState;
   session: Session | null;
+  /** 선택한 출발 지역 id(SERVICE_AREAS). 수동 출발점은 이 지역의 중심 */
+  areaId: string;
   origin: Origin;
   options: Options;
   lastNone: string[] | null;
@@ -56,6 +58,7 @@ type State = {
   setLocationConsent: (v: boolean) => Promise<void>;
   setOptions: (o: Partial<Options>) => void;
   useManualOrigin: () => void;
+  setArea: (id: string) => void;
   useMyLocation: () => Promise<void>;
   startMystery: () => boolean;
   revealNextClue: () => void;
@@ -125,7 +128,8 @@ export const useApp = create<State>((set, get) => ({
   consent: null,
   progress: emptyProgress(),
   session: null,
-  origin: { ...JONGNO5GA_STATION, kind: "manual" },
+  areaId: DEFAULT_AREA_ID,
+  origin: { ...getArea(DEFAULT_AREA_ID).center, kind: "manual" },
   options: { durationMinutes: 15, themeId: null, freeOnly: true, noReservation: true },
   lastNone: null,
   checkIn: { state: "idle" },
@@ -160,7 +164,7 @@ export const useApp = create<State>((set, get) => ({
     const consent = { ...c, locationConsent: v, at: new Date().toISOString() };
     set({ consent });
     await kvSet("consent", consent);
-    if (!v) set({ origin: { ...JONGNO5GA_STATION, kind: "manual" } });
+    if (!v) set({ origin: { ...getArea(get().areaId).center, kind: "manual" } });
   },
 
   setOptions(o) {
@@ -168,31 +172,44 @@ export const useApp = create<State>((set, get) => ({
   },
 
   useManualOrigin() {
-    set({ origin: { ...JONGNO5GA_STATION, kind: "manual" }, gpsMessage: null });
+    set({ origin: { ...getArea(get().areaId).center, kind: "manual" }, gpsMessage: null });
+  },
+
+  setArea(id) {
+    const area = getArea(id);
+    set({ areaId: area.id, origin: { ...area.center, kind: "manual" }, gpsMessage: null, lastNone: null });
   },
 
   async useMyLocation() {
+    const current = getArea(get().areaId);
     if (!get().consent?.locationConsent) {
-      set({ gpsMessage: "위치 이용에 동의하지 않아 종로5가역을 출발점으로 사용합니다. 설정에서 동의할 수 있어요." });
+      set({ gpsMessage: `위치 이용에 동의하지 않아 ${current.name}을(를) 출발점으로 사용합니다. 설정에서 동의할 수 있어요.` });
       return;
     }
     set({ gpsMessage: "위치를 확인하는 중…" });
     const r = await acquireFix(navigator.geolocation, { timeoutMs: 8000, maxAttempts: 2 });
     if (r.status === "ok") {
-      const away = haversineMeters({ lat: r.fix.lat, lng: r.fix.lng }, JONGNO5GA_STATION);
-      // 서비스 지역(종로5가 생활권)에서 멀면 그 좌표로 탐험을 만들 수 없다. PC는 IP·Wi-Fi 기반이라 크게 틀리거나 VPN으로 해외로 잡힐 수 있다.
-      if (away > FAR_FROM_SERVICE_AREA_M) {
+      const here = { lat: r.fix.lat, lng: r.fix.lng };
+      // 서비스 지역에서 멀면 그 좌표로 탐험을 만들 수 없다. PC는 IP·Wi-Fi 기반이라 크게 틀리거나 VPN으로 해외로 잡힐 수 있다.
+      const near = nearestArea(here, FAR_FROM_SERVICE_AREA_M);
+      if (!near) {
+        const away = Math.min(...SERVICE_AREAS.map((a) => haversineMeters(here, a.center)));
         const km = away >= 10000 ? `${Math.round(away / 1000)}km` : `${(away / 1000).toFixed(1)}km`;
         set({
-          origin: { ...JONGNO5GA_STATION, kind: "manual" },
-          gpsMessage: `브라우저가 알려 준 위치가 종로5가에서 약 ${km} 떨어져 있어요(정확도 약 ${Math.round(r.fix.accuracy)}m). PC는 IP·Wi-Fi로 위치를 추정해 틀릴 수 있고 VPN을 쓰면 해외로 나올 수 있어요. 이 위치는 사용하지 않고 종로5가역에서 시작합니다.`,
+          origin: { ...current.center, kind: "manual" },
+          gpsMessage: `브라우저가 알려 준 위치가 가장 가까운 서비스 지역에서도 약 ${km} 떨어져 있어요(정확도 약 ${Math.round(r.fix.accuracy)}m). PC는 IP·Wi-Fi로 위치를 추정해 틀릴 수 있고 VPN을 쓰면 해외로 나올 수 있어요. 이 위치는 사용하지 않고 ${current.name}에서 시작합니다.`,
         });
         return;
       }
-      set({ origin: { lat: r.fix.lat, lng: r.fix.lng, kind: "gps" }, gpsMessage: `내 위치를 사용합니다(정확도 약 ${Math.round(r.fix.accuracy)}m).` });
+      // 가장 가까운 지역을 선택 지역으로 바꾸고, 내 위치를 출발점으로 쓴다.
+      set({
+        areaId: near.area.id,
+        origin: { lat: r.fix.lat, lng: r.fix.lng, kind: "gps" },
+        gpsMessage: `내 위치를 사용합니다(${near.area.name} 지역, 정확도 약 ${Math.round(r.fix.accuracy)}m).`,
+      });
     } else {
       const m = r.status === "denied" ? "위치 권한이 거부되어" : "위치를 확인하지 못해";
-      set({ origin: { ...JONGNO5GA_STATION, kind: "manual" }, gpsMessage: `${m} 종로5가역을 출발점으로 사용합니다.` });
+      set({ origin: { ...current.center, kind: "manual" }, gpsMessage: `${m} ${current.name}을(를) 출발점으로 사용합니다.` });
     }
   },
 

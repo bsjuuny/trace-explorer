@@ -30,7 +30,8 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
   const prevDow = (t.dow + 6) % 7;
   const regular = special ? null : findWindow(policy, t.dow, t.month, prevMonth, t.minutes);
 
-  const fee = special?.fee ?? resolveFee(policy, t.dow);
+  // 전날 시작해 자정을 넘긴 구간은 시작일(전날)의 요일 요금을 적용한다.
+  const fee = special?.fee ?? resolveFee(policy, regular?.fromPreviousDay ? prevDow : t.dow);
 
   if (policy.publicOutdoor) {
     // 외부 공공구역: 시간표 없이 가능. 요금은 0으로 취급.

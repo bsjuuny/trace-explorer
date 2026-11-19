@@ -156,17 +156,24 @@ export async function kvDelete(key: string): Promise<void> {
  */
 export function wipeAll(): Promise<{ blocked: boolean }> {
   const run = async (): Promise<{ blocked: boolean }> => {
-    memory.clear();
-    pending.clear();
     const db = await open();
     if (db) db.close();
     dbPromise = null;
     return new Promise((resolve) => {
-      if (typeof indexedDB === "undefined") return resolve({ blocked: false });
+      if (typeof indexedDB === "undefined") {
+        memory.clear();
+        pending.clear();
+        return resolve({ blocked: false });
+      }
       let done = false;
       const finish = (blocked: boolean) => {
         if (done) return;
         done = true;
+        // 메모리·보류 변경은 실제로 삭제가 끝난 뒤에만 비운다(막힌 경우 화면 상태와 저장 상태가 어긋나지 않게).
+        if (!blocked) {
+          memory.clear();
+          pending.clear();
+        }
         resolve({ blocked });
       };
       const req = indexedDB.deleteDatabase(DB_NAME);

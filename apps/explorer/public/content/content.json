@@ -647,6 +647,350 @@
     {
       "schemaVersion": 1,
       "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-bakery-101",
+      "name": "[데모] 난곡 시장통 빵집",
+      "coordinates": {
+        "lat": 37.47193,
+        "lng": 126.92244
+      },
+      "categories": [
+        "bakery"
+      ],
+      "tags": [
+        "bread",
+        "market"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "시장 골목 초입, 줄이 먼저 보이는 가게예요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-cafe-102",
+      "name": "[데모] 언덕 위 작은 카페",
+      "coordinates": {
+        "lat": 37.47013,
+        "lng": 126.92284
+      },
+      "categories": [
+        "cafe"
+      ],
+      "tags": [
+        "coffee",
+        "hill"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "오르막 끝에서 숨을 고르면 보이는 창가 자리가 있어요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-restaurant-103",
+      "name": "[데모] 골목 칼국수집",
+      "coordinates": {
+        "lat": 37.47153,
+        "lng": 126.92044
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "noodle",
+        "lunch"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "점심때면 면 삶는 김이 골목까지 번져요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-restaurant-104",
+      "name": "[데모] 퇴근길 호프집",
+      "coordinates": {
+        "lat": 37.46973,
+        "lng": 126.92104
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "night",
+        "pub"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "late-night",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "해가 지면 간판 불이 켜지는 모퉁이 가게예요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-alley-105",
+      "name": "[데모] 계단 마을길",
+      "coordinates": {
+        "lat": 37.47223,
+        "lng": 126.92124
+      },
+      "categories": [
+        "alley"
+      ],
+      "tags": [
+        "stairs",
+        "village"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "계단 난간에 손때 묻은 색이 칠해져 있어요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-park-106",
+      "name": "[데모] 고갯마루 쉼터",
+      "coordinates": {
+        "lat": 37.47033,
+        "lng": 126.92354
+      },
+      "categories": [
+        "park"
+      ],
+      "tags": [
+        "bench",
+        "view"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "동네가 한눈에 내려다보이는 벤치가 있어요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-heritage-107",
+      "name": "[데모] 옛 마을 표지석",
+      "coordinates": {
+        "lat": 37.47153,
+        "lng": 126.92304
+      },
+      "categories": [
+        "heritage"
+      ],
+      "tags": [
+        "stone",
+        "history"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 80,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "길가 낮은 돌에 마을 이름이 새겨져 있어요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-nangok-cafe-108",
+      "name": "[데모] 우체국 옆 찻집",
+      "coordinates": {
+        "lat": 37.46953,
+        "lng": 126.92204
+      },
+      "categories": [
+        "cafe"
+      ],
+      "tags": [
+        "tea",
+        "post"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "closed-monday",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null,
+      "extraHint": "빨간 우체통이 문 옆에 서 있어요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
       "id": "demo-far-008",
       "name": "[데모] 먼 곳의 정원",
       "coordinates": {
@@ -1338,6 +1682,238 @@
         {
           "order": 3,
           "text": "큰 나무 아래가 목적지다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-bakery-101",
+      "placeId": "demo-nangok-bakery-101",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "시장 골목에서 갓 구운 냄새가 나는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "아침이면 줄이 생기는 작은 가게",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "시장 입구 바로 안쪽",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-cafe-102",
+      "placeId": "demo-nangok-cafe-102",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "오르막을 올라야 만나는 조용한 카페",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "창밖으로 동네 지붕이 보인다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "계단 위 갈림길 근처",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-restaurant-103",
+      "placeId": "demo-nangok-restaurant-103",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "뜨끈한 국물 냄새가 퍼지는 골목",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "점심시간에 가장 붐빈다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "좁은 골목 안쪽 모퉁이",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-restaurant-104",
+      "placeId": "demo-nangok-restaurant-104",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "저녁이 되어야 문을 여는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "붉은 간판 불빛이 길을 비춘다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "퇴근길 사람들로 붐빈다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-alley-105",
+      "placeId": "demo-nangok-alley-105",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "걸어서만 오를 수 있는 마을길",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "계단마다 이야기가 숨어 있다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "난간을 따라 올라가 보자",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-park-106",
+      "placeId": "demo-nangok-park-106",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "고개를 넘으면 만나는 작은 쉼터",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "벤치에 앉으면 동네가 보인다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "나무 한 그루가 그늘을 만든다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-heritage-107",
+      "placeId": "demo-nangok-heritage-107",
+      "themeId": "heritage",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "오래전 마을의 이름을 기억하는 돌",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "길가에 낮게 놓여 있다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "표지 글씨를 읽어 보자",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-nangok-cafe-108",
+      "placeId": "demo-nangok-cafe-108",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "편지가 오가던 자리 옆 찻집",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "빨간 우체통이 이정표다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "문 앞에서 향긋한 차 냄새가 난다",
           "difficulty": "easy",
           "reviewed": false
         }

@@ -12,7 +12,7 @@ export function ConsentScreen() {
   return (
     <section aria-labelledby="c-h" className="space-y-4">
       <h1 id="c-h" className="text-2xl font-bold">시작하기 전에</h1>
-      <p>TRACE는 15분 동안 종로5가역 주변에서 몰랐던 장소를 단서로 발견하는 탐험 게임입니다.</p>
+      <p>TRACE는 15분 동안 종로5가역·난곡우체국사거리 주변에서 몰랐던 장소를 단서로 발견하는 탐험 게임입니다.</p>
       <div className="rounded-xl bg-[#fff7e8] p-4 text-sm">
         <strong>안전 주의</strong>
         <ul className="list-disc pl-5">

@@ -16,7 +16,23 @@ self.addEventListener("message", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("trace-") && k !== CACHE_VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+    (async () => {
+      const keys = await caches.keys();
+      const fresh = await caches.open(CACHE_VERSION);
+      // 새 캐시에 아직 없는 콘텐츠 응답(content.json 등)은 이전 캐시에서 옮겨 둔다.
+      // 활성화 직후 오프라인이어도 24시간 이내 콘텐츠를 계속 쓸 수 있게 하기 위함이다.
+      for (const k of keys.filter((k) => k.startsWith("trace-") && k !== CACHE_VERSION)) {
+        const old = await caches.open(k);
+        for (const req of await old.keys()) {
+          if (!/\/content\/content(\.prev)?\.json$/.test(new URL(req.url).pathname)) continue;
+          if (await fresh.match(req)) continue;
+          const res = await old.match(req);
+          if (res) await fresh.put(req, res);
+        }
+      }
+      await Promise.all(keys.filter((k) => k.startsWith("trace-") && k !== CACHE_VERSION).map((k) => caches.delete(k)));
+      await self.clients.claim();
+    })(),
   );
 });
 

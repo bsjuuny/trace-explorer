@@ -114,8 +114,8 @@ export function PlacesTab({ bundle, setBundle }: Props) {
               </select>
             </F>
             <div className="row">
-              <F label="체크인 반경(m)"><input type="number" value={sel.checkInPolicy.radiusMeters} onChange={(e) => update(sel.id, (p) => ({ ...p, checkInPolicy: { ...p.checkInPolicy, radiusMeters: Number(e.target.value) } }))} /></F>
-              <F label="최대 정확도(m)"><input type="number" value={sel.checkInPolicy.maxAccuracyMeters} onChange={(e) => update(sel.id, (p) => ({ ...p, checkInPolicy: { ...p.checkInPolicy, maxAccuracyMeters: Number(e.target.value) } }))} /></F>
+              <F label="체크인 반경(m, 1~500)"><CoordInput key={`rad-${sel.id}`} value={sel.checkInPolicy.radiusMeters} min={1} max={500} onChange={(v) => v !== null && update(sel.id, (p) => ({ ...p, checkInPolicy: { ...p.checkInPolicy, radiusMeters: v } }))} /></F>
+              <F label="최대 정확도(m, 1~200)"><CoordInput key={`acc-${sel.id}`} value={sel.checkInPolicy.maxAccuracyMeters} min={1} max={200} onChange={(v) => v !== null && update(sel.id, (p) => ({ ...p, checkInPolicy: { ...p.checkInPolicy, maxAccuracyMeters: v } }))} /></F>
             </div>
             <h4>출처·검증</h4>
             <F label="출처 URL"><input value={sel.source.sourceUrl ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, source: { ...p.source, sourceUrl: e.target.value || null } }))} /></F>

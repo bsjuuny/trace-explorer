@@ -212,3 +212,19 @@ test("길 안내·목적지 카드와 외부 지도 링크는 없고, 탐험 종
   await expect(page.getByRole("heading", { name: "탐험을 종료했어요" })).toBeVisible();
   await expect(page.getByText(/목적지는 .*\[데모\]/)).toBeVisible();
 });
+
+test("출발 지역을 난곡우체국사거리로 바꾸면 난곡 권역의 장소가 선택된다", async ({ page }) => {
+  await installGeoSpy(page);
+  await page.goto(START);
+  await acceptConsent(page, false);
+  await expect(page.getByText("출발점: 종로5가역(수동 선택)")).toBeVisible();
+  await page.getByLabel("출발 지역").selectOption("nangok");
+  await expect(page.getByText("출발점: 난곡우체국사거리(수동 선택)")).toBeVisible();
+  await page.getByRole("button", { name: "탐험 시작" }).click();
+  await expect(page.getByRole("list", { name: "단서 목록" }).getByRole("listitem")).toHaveCount(1);
+  const c = await readSessionCoords(page);
+  // 난곡(위도 약 37.47)은 종로5가(약 37.57)보다 남쪽에 있다.
+  expect(c.lat).toBeLessThan(37.5);
+  expect(c.lng).toBeGreaterThan(126.91);
+  expect(c.lng).toBeLessThan(126.93);
+});

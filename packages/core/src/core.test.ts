@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { demoBundle } from "@trace/data";
 import type { MysteryRequest, Place } from "@trace/schemas";
 import {
-  acquireFix, applyCompletion, emptyProgress, evaluateAccess, evaluateCheckIn, generateMystery, JONGNO5GA_STATION,
+  acquireFix, applyCompletion, emptyProgress, evaluateAccess, evaluateCheckIn, generateMystery, getArea, JONGNO5GA_STATION, nearestArea, SERVICE_AREAS,
   makeRng, toSeoul, type GeoProvider,
 } from "./index";
 
@@ -358,13 +358,60 @@ describe("미션 단위 후보 평가", () => {
   });
 });
 
-describe("데모 콘텐츠 15개", () => {
-  it("장소 15곳·미션 15개, 장소마다 미션과 힌트가 있다", () => {
-    expect(demoBundle.places).toHaveLength(15);
-    expect(demoBundle.missions).toHaveLength(15);
+describe("데모 콘텐츠: 종로5가 15개 + 난곡 8개", () => {
+  const nangok = SERVICE_AREAS.find((a) => a.id === "nangok")!;
+  const inNangok = (id: string) => id.startsWith("demo-nangok-");
+  it("총 23곳, 장소마다 미션 1개와 힌트가 있다", () => {
+    expect(demoBundle.places).toHaveLength(23);
+    expect(demoBundle.missions).toHaveLength(23);
+    expect(demoBundle.places.filter((p) => !inNangok(p.id))).toHaveLength(15);
+    expect(demoBundle.places.filter((p) => inNangok(p.id))).toHaveLength(8);
     for (const p of demoBundle.places) {
       expect(demoBundle.missions.filter((m) => m.placeId === p.id), p.id).toHaveLength(1);
       expect(p.extraHint, p.id).toBeTruthy();
+    }
+  });
+  it("서비스 지역 정의: 종로5가역·난곡우체국사거리, 난곡 좌표는 임시값 표시", () => {
+    expect(SERVICE_AREAS.map((a) => a.id)).toEqual(["jongno5ga", "nangok"]);
+    expect(nangok.approximate).toBe(true);
+    expect(getArea("nope").id).toBe("jongno5ga");
+    expect(nearestArea(nangok.center, 3000)?.area.id).toBe("nangok");
+    expect(nearestArea(JONGNO5GA_STATION, 3000)?.area.id).toBe("jongno5ga");
+    expect(nearestArea({ lat: 35.1, lng: 129.0 }, 3000)).toBeNull(); // 부산
+  });
+  it("난곡 출발점에서는 난곡 장소만, 종로5가 출발점에서는 종로5가 장소만 나온다", () => {
+    const nIds = new Set<string>();
+    const jIds = new Set<string>();
+    for (let i = 0; i < 150; i++) {
+      const n = generateMystery(baseReq({ origin: nangok.center, randomSeed: `n${i}` }), demoBundle, demoOpts);
+      expect(n.status).toBe("ok");
+      if (n.status === "ok") nIds.add(n.place.id);
+      const j = generateMystery(baseReq({ randomSeed: `j${i}` }), demoBundle, demoOpts);
+      if (j.status === "ok") jIds.add(j.place.id);
+    }
+    expect([...nIds].every(inNangok)).toBe(true);
+    expect([...jIds].some(inNangok)).toBe(false);
+    expect(nIds.size).toBeGreaterThanOrEqual(5);
+  });
+  it("난곡 장소의 도보 ETA는 거리로 계산한 근사값(approximate)이고 15분 안이다", () => {
+    const r = generateMystery(baseReq({ origin: nangok.center }), demoBundle, demoOpts);
+    expect(r.status).toBe("ok");
+    for (const c of r.candidates.filter((c) => inNangok(c.placeId) && c.eligibility === "eligible")) {
+      expect(c.routeEstimateConfidence).toBe("approximate");
+      expect(c.estimatedTotalMinutes!).toBeLessThanOrEqual(15);
+    }
+  });
+  it("난곡 출발점의 테마별 선택", () => {
+    for (const t of ["bread", "food", "heritage", "walk"]) {
+      let ok = 0;
+      for (let i = 0; i < 40; i++) {
+        const r = generateMystery(baseReq({ origin: nangok.center, themeIds: [t], randomSeed: `${t}${i}` }), demoBundle, demoOpts);
+        if (r.status === "ok") {
+          expect(r.mission.themeId).toBe(t);
+          ok++;
+        }
+      }
+      expect(ok, t).toBeGreaterThan(0);
     }
   });
   it("낮 시간 15분 코스에서 여러 장소가 골고루 선택된다", () => {
@@ -451,5 +498,18 @@ describe("엔진: 비활성 테마·미션 순서", () => {
       const b = generateMystery(baseReq({ randomSeed: `o${i}` }), only([extra, m0]), demoOpts);
       expect(a.status === "ok" && b.status === "ok" && a.mission.id === b.mission.id).toBe(true);
     }
+  });
+});
+
+describe("자정을 넘기는 구간의 요금 요일", () => {
+  it("일요일 한정 요금은 월요일 새벽 도착에도 시작일(일요일) 요금이 적용된다", () => {
+    const p = {
+      ...lateNight, hoursFreshness: "verified" as const, feeFreshness: "verified" as const, closedDays: [] as number[], exceptions: [],
+      windows: [{ days: [0], open: "20:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const }],
+      fees: [{ days: [0], feeKrw: 10000 }, { feeKrw: 0 }],
+    };
+    const r = evaluateAccess(p, q("2026-11-23T01:00:00+09:00", { allowUnverified: false, stayMinutes: 3, maxAdmissionFeeKrw: 1000 }));
+    expect(r.feeKrw).toBe(10000);
+    expect(r.reasons).toContain("fee-exceeds-limit");
   });
 });
