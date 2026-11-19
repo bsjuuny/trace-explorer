@@ -1,0 +1,82 @@
+/* 앱 셸·콘텐츠 캐시. 캐시 버전을 올리면 이전 캐시는 activate에서 삭제된다. */
+const CACHE_VERSION = "trace-__BUILD_ID__"; // 빌드 시 해시로 치환(vite 플러그인)
+const CONTENT_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 오래된 운영정보를 무기한 보여주지 않는다
+const PRECACHE = "__PRECACHE__"; // 빌드 시 해시된 JS/CSS 경로 JSON으로 치환
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"].concat(PRECACHE.startsWith("__") ? [] : JSON.parse(PRECACHE));
+
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(SHELL)));
+  // 즉시 활성화하지 않는다. 사용자가 업데이트 안내에서 적용을 선택하면 SKIP_WAITING을 받는다.
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data === "SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("trace-") && k !== CACHE_VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // 지도 SDK 등 외부 요청은 건드리지 않는다
+
+  if (/\/content\/content(\.prev)?\.json$/.test(url.pathname)) {
+    e.respondWith(contentNetworkFirst(req));
+    return;
+  }
+  if (req.mode === "navigate") {
+    // index.html은 network-first: 새 배포가 재방문자에게 전달되도록 한다.
+    e.respondWith(
+      fetch(req).then((res) => {
+        // 정상 HTML 문서 응답만 index.html로 캐시한다(리다이렉트·타 Content-Type·오류 응답 제외).
+        const isHtml = (res.headers.get("content-type") || "").includes("text/html");
+        if (res.ok && res.type === "basic" && !res.redirected && isHtml) {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put("./index.html", copy));
+        }
+        return res;
+      }).catch(() => caches.match("./index.html").then((h) => h || caches.match("./"))),
+    );
+    return;
+  }
+  e.respondWith(
+    caches.match(req).then(
+      (hit) =>
+        hit ||
+        fetch(req).then((res) => {
+          // 해시된 에셋·앱 셸 파일만 런타임 캐시에 저장한다(임의 경로 응답 캐시 오염 방지).
+          if (res.ok && res.type === "basic" && /\/(assets\/|manifest\.webmanifest$|icon\.svg$)/.test(url.pathname)) {
+            const copy = res.clone();
+            caches.open(CACHE_VERSION).then((c) => c.put(req, copy));
+          }
+          return res;
+        }),
+    ),
+  );
+});
+
+async function contentNetworkFirst(req) {
+  const cache = await caches.open(CACHE_VERSION);
+  try {
+    const res = await fetch(req, { cache: "no-cache" });
+    if (res.ok) {
+      const headers = new Headers(res.headers);
+      headers.set("x-cached-at", String(Date.now()));
+      const body = await res.clone().blob();
+      await cache.put(req, new Response(body, { status: res.status, headers }));
+      return res;
+    }
+  } catch {
+    /* 네트워크 예외: 캐시로 폴백 */
+  }
+  // 네트워크 예외 또는 5xx/4xx일 때도 24시간 이내 캐시가 있으면 그것을 쓴다.
+  const hit = await cache.match(req);
+  const at = hit ? Number(hit.headers.get("x-cached-at") || 0) : 0;
+  if (hit && Date.now() - at < CONTENT_MAX_AGE_MS) return hit;
+  return new Response("stale-or-offline", { status: 503 });
+}

@@ -1,0 +1,854 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "2026-11-19.1",
+  "expiresAt": "2027-02-28T00:00:00+09:00",
+  "places": [
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-bakery-001",
+      "name": "[데모] 골목의 작은 빵집",
+      "coordinates": {
+        "lat": 37.5712,
+        "lng": 126.9992
+      },
+      "categories": [
+        "bakery",
+        "cafe"
+      ],
+      "tags": [
+        "bread",
+        "local"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-cafe-002",
+      "name": "[데모] 시장 옆 카페",
+      "coordinates": {
+        "lat": 37.5703,
+        "lng": 126.9981
+      },
+      "categories": [
+        "cafe"
+      ],
+      "tags": [
+        "coffee"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "closed-monday",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-restaurant-003",
+      "name": "[데모] 골목 안쪽 식당",
+      "coordinates": {
+        "lat": 37.5718,
+        "lng": 127.0001
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "soup"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-bar-004",
+      "name": "[데모] 심야 식당",
+      "coordinates": {
+        "lat": 37.5707,
+        "lng": 126.9996
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "night"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "late-night",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-heritage-005",
+      "name": "[데모] 고궁형 유산지",
+      "coordinates": {
+        "lat": 37.5726,
+        "lng": 126.9971
+      },
+      "categories": [
+        "heritage"
+      ],
+      "tags": [
+        "heritage",
+        "history"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "heritage-jongmyo-style",
+      "checkInPolicy": {
+        "radiusMeters": 100,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 7,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-alley-006",
+      "name": "[데모] 이야기 골목",
+      "coordinates": {
+        "lat": 37.5714,
+        "lng": 126.9979
+      },
+      "categories": [
+        "alley"
+      ],
+      "tags": [
+        "walk",
+        "street"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 3,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-museum-007",
+      "name": "[데모] 예약제 작은 전시",
+      "coordinates": {
+        "lat": 37.5699,
+        "lng": 126.999
+      },
+      "categories": [
+        "heritage"
+      ],
+      "tags": [
+        "exhibit"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "reservation-only",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-far-008",
+      "name": "[데모] 먼 곳의 정원",
+      "coordinates": {
+        "lat": 37.58,
+        "lng": 127.01
+      },
+      "categories": [
+        "park"
+      ],
+      "tags": [
+        "park"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": null
+    }
+  ],
+  "accessPolicies": [
+    {
+      "id": "daily-day",
+      "closedDays": [],
+      "windows": [
+        {
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "07:00",
+          "close": "21:00",
+          "lastEntryMinutesBeforeClose": 0,
+          "mode": "free-roam"
+        }
+      ],
+      "fees": [
+        {
+          "feeKrw": 0
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": false,
+      "estimatedStayMinutes": 3,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    },
+    {
+      "id": "closed-monday",
+      "closedDays": [
+        1
+      ],
+      "windows": [
+        {
+          "days": [
+            0,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "10:00",
+          "close": "19:00",
+          "lastEntryMinutesBeforeClose": 30,
+          "mode": "free-roam"
+        }
+      ],
+      "fees": [
+        {
+          "feeKrw": 0
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": false,
+      "estimatedStayMinutes": 3,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    },
+    {
+      "id": "late-night",
+      "closedDays": [],
+      "windows": [
+        {
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "18:00",
+          "close": "02:00",
+          "lastEntryMinutesBeforeClose": 30,
+          "mode": "free-roam"
+        }
+      ],
+      "fees": [
+        {
+          "feeKrw": 0
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": false,
+      "estimatedStayMinutes": 3,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    },
+    {
+      "id": "heritage-jongmyo-style",
+      "closedDays": [
+        2
+      ],
+      "windows": [
+        {
+          "days": [
+            1,
+            4,
+            5
+          ],
+          "open": "09:00",
+          "close": "18:00",
+          "lastEntryMinutesBeforeClose": 60,
+          "mode": "guided"
+        },
+        {
+          "days": [
+            3,
+            6,
+            0
+          ],
+          "open": "09:00",
+          "close": "18:00",
+          "lastEntryMinutesBeforeClose": 60,
+          "mode": "free-roam",
+          "months": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        },
+        {
+          "days": [
+            3,
+            6,
+            0
+          ],
+          "open": "09:00",
+          "close": "17:30",
+          "lastEntryMinutesBeforeClose": 60,
+          "mode": "free-roam",
+          "months": [
+            1,
+            11,
+            12
+          ]
+        }
+      ],
+      "fees": [
+        {
+          "days": [
+            3
+          ],
+          "feeKrw": 0,
+          "note": "수요일 무료(데모 규칙)"
+        },
+        {
+          "feeKrw": 1000
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": false,
+      "estimatedStayMinutes": 4,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    },
+    {
+      "id": "outdoor-public",
+      "closedDays": [],
+      "windows": [],
+      "fees": [
+        {
+          "feeKrw": 0
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": true,
+      "estimatedStayMinutes": 2,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    },
+    {
+      "id": "reservation-only",
+      "closedDays": [],
+      "windows": [
+        {
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "10:00",
+          "close": "18:00",
+          "lastEntryMinutesBeforeClose": 0,
+          "mode": "reservation-required"
+        }
+      ],
+      "fees": [
+        {
+          "feeKrw": 0
+        }
+      ],
+      "exceptions": [],
+      "publicOutdoor": false,
+      "estimatedStayMinutes": 3,
+      "hoursFreshness": "unknown",
+      "feeFreshness": "unknown"
+    }
+  ],
+  "themes": [
+    {
+      "id": "bread",
+      "label": "빵·디저트",
+      "categories": [
+        "bakery",
+        "cafe"
+      ],
+      "active": true
+    },
+    {
+      "id": "food",
+      "label": "식당",
+      "categories": [
+        "restaurant"
+      ],
+      "active": true
+    },
+    {
+      "id": "heritage",
+      "label": "문화유산",
+      "categories": [
+        "heritage"
+      ],
+      "active": true
+    },
+    {
+      "id": "walk",
+      "label": "골목·산책",
+      "categories": [
+        "alley",
+        "park"
+      ],
+      "active": true
+    }
+  ],
+  "missions": [
+    {
+      "id": "m-demo-bakery-001",
+      "placeId": "demo-bakery-001",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "문 앞에 밀가루 향이 번지는 작은 가게",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "아침마다 줄이 생기는 골목",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "간판에 곡식 그림이 있다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-cafe-002",
+      "placeId": "demo-cafe-002",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "시장 소리와 커피 향이 섞이는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "창가 자리가 유명한 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "시장 입구에서 한 블록",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-restaurant-003",
+      "placeId": "demo-restaurant-003",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "오래된 국물 냄새가 나는 골목",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "점심시간마다 붐비는 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "좁은 골목 안쪽 모퉁이",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-bar-004",
+      "placeId": "demo-bar-004",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "해가 지면 불이 켜지는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "밤에만 간판이 보이는 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "골목 끝 붉은 등",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-heritage-005",
+      "placeId": "demo-heritage-005",
+      "themeId": "heritage",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "담장 너머로 고요함이 느껴지는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "오랜 왕실의 흔적이 남은 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "큰 문 앞 넓은 마당",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-alley-006",
+      "placeId": "demo-alley-006",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "걸어야만 보이는 짧은 골목",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "벽에 옛 사진이 걸린 길",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "두 갈래가 만나는 곳",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-museum-007",
+      "placeId": "demo-museum-007",
+      "themeId": "heritage",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "작지만 예약이 필요한 전시",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "문 앞 안내판을 확인",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "건물 2층 창이 보인다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-far-008",
+      "placeId": "demo-far-008",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "도심 속 숨은 초록",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "넓은 잔디가 있는 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "먼 길을 가야 한다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    }
+  ],
+  "rewards": [
+    {
+      "id": "reward-standard",
+      "xp": 100,
+      "badge": "explorer-1",
+      "repeatPolicy": "once"
+    }
+  ]
+}

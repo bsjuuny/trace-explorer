@@ -1,0 +1,26 @@
+{
+  "name": "@trace/admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p . --noEmit && vite build",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "dependencies": {
+    "@trace/core": "workspace:*",
+    "@trace/data": "workspace:*",
+    "@trace/schemas": "workspace:*",
+    "@trace/templates": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^7.3.8"
+  }
+}

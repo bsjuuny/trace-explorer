@@ -1,0 +1,91 @@
+import { SCHEMA_VERSION } from "@trace/schemas";
+
+/**
+ * 데모 전용 콘텐츠. 실제 업체·장소가 아니며 좌표는 종로5가역 인근의 임의 지점이다.
+ * 검증 필드(verifiedBy, lastCheckedAt 등)는 의도적으로 null이다.
+ */
+const CV = "2026-11-19.1";
+
+const source = {
+  type: "manual" as const, sourceId: null, sourceUrl: null, license: null, attribution: null,
+  verificationMethod: null, verifiedBy: null, lastCheckedAt: null, expiresAt: null,
+};
+
+type PlaceSeed = {
+  id: string; name: string; lat: number; lng: number; categories: string[]; tags: string[];
+  policy: string; walk: number | null; radius?: number;
+};
+
+const mkPlace = (p: PlaceSeed) => ({
+  schemaVersion: SCHEMA_VERSION, contentVersion: CV,
+  id: p.id, name: `[데모] ${p.name}`,
+  coordinates: { lat: p.lat, lng: p.lng },
+  categories: p.categories, tags: p.tags,
+  source, freshness: "unknown" as const,
+  publication: { status: "draft" as const, isDemo: true },
+  accessPolicyId: p.policy,
+  checkInPolicy: { radiusMeters: p.radius ?? 60, maxAccuracyMeters: 80 },
+  missionTemplateIds: ["mystery-discovery-v1"],
+  walkEstimate: p.walk === null ? null : { minutes: p.walk, confidence: "approximate" as const },
+});
+
+const all = [0, 1, 2, 3, 4, 5, 6];
+
+const mkMission = (placeId: string, themeId: string, texts: [string, string, string]) => ({
+  id: `m-${placeId}`, placeId, themeId, durationMinutes: 15 as const,
+  clues: texts.map((text, i) => ({ order: i + 1, text, difficulty: (["hard", "medium", "easy"] as const)[i]!, reviewed: false })),
+  rewardId: "reward-standard", safetyReviewed: false, reviewed: false,
+});
+
+export const demoContent = {
+  schemaVersion: SCHEMA_VERSION,
+  contentVersion: CV,
+  expiresAt: "2027-02-28T00:00:00+09:00",
+  themes: [
+    { id: "bread", label: "빵·디저트", categories: ["bakery", "cafe"], active: true },
+    { id: "food", label: "식당", categories: ["restaurant"], active: true },
+    { id: "heritage", label: "문화유산", categories: ["heritage"], active: true },
+    { id: "walk", label: "골목·산책", categories: ["alley", "park"], active: true },
+  ],
+  rewards: [
+    { id: "reward-standard", xp: 100, badge: "explorer-1", repeatPolicy: "once" as const },
+  ],
+  accessPolicies: [
+    { id: "daily-day", closedDays: [], windows: [{ days: all, open: "07:00", close: "21:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const }], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: false, estimatedStayMinutes: 3, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
+    { id: "closed-monday", closedDays: [1], windows: [{ days: [0, 2, 3, 4, 5, 6], open: "10:00", close: "19:00", lastEntryMinutesBeforeClose: 30, mode: "free-roam" as const }], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: false, estimatedStayMinutes: 3, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
+    { id: "late-night", closedDays: [], windows: [{ days: all, open: "18:00", close: "02:00", lastEntryMinutesBeforeClose: 30, mode: "free-roam" as const }], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: false, estimatedStayMinutes: 3, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
+    {
+      // 종묘형 경계 케이스(데모): 화 휴관, 수 무료, 월·목·금 시간제 해설, 주말 일반, 계절별 시간
+      id: "heritage-jongmyo-style", closedDays: [2],
+      windows: [
+        { days: [1, 4, 5], open: "09:00", close: "18:00", lastEntryMinutesBeforeClose: 60, mode: "guided" as const },
+        { days: [3, 6, 0], open: "09:00", close: "18:00", lastEntryMinutesBeforeClose: 60, mode: "free-roam" as const, months: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+        { days: [3, 6, 0], open: "09:00", close: "17:30", lastEntryMinutesBeforeClose: 60, mode: "free-roam" as const, months: [1, 11, 12] },
+      ],
+      fees: [{ days: [3], feeKrw: 0, note: "수요일 무료(데모 규칙)" }, { feeKrw: 1000 }],
+      exceptions: [], publicOutdoor: false, estimatedStayMinutes: 4, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const,
+    },
+    { id: "outdoor-public", closedDays: [], windows: [], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: true, estimatedStayMinutes: 2, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
+    { id: "reservation-only", closedDays: [], windows: [{ days: all, open: "10:00", close: "18:00", lastEntryMinutesBeforeClose: 0, mode: "reservation-required" as const }], fees: [{ feeKrw: 0 }], exceptions: [], publicOutdoor: false, estimatedStayMinutes: 3, hoursFreshness: "unknown" as const, feeFreshness: "unknown" as const },
+  ],
+  places: [
+    mkPlace({ id: "demo-bakery-001", name: "골목의 작은 빵집", lat: 37.5712, lng: 126.9992, categories: ["bakery", "cafe"], tags: ["bread", "local"], policy: "daily-day", walk: 4 }),
+    mkPlace({ id: "demo-cafe-002", name: "시장 옆 카페", lat: 37.5703, lng: 126.9981, categories: ["cafe"], tags: ["coffee"], policy: "closed-monday", walk: 4 }),
+    mkPlace({ id: "demo-restaurant-003", name: "골목 안쪽 식당", lat: 37.5718, lng: 127.0001, categories: ["restaurant"], tags: ["soup"], policy: "daily-day", walk: 4 }),
+    mkPlace({ id: "demo-bar-004", name: "심야 식당", lat: 37.5707, lng: 126.9996, categories: ["restaurant"], tags: ["night"], policy: "late-night", walk: 4 }),
+    mkPlace({ id: "demo-heritage-005", name: "고궁형 유산지", lat: 37.5726, lng: 126.9971, categories: ["heritage"], tags: ["heritage", "history"], policy: "heritage-jongmyo-style", walk: 7, radius: 100 }),
+    mkPlace({ id: "demo-alley-006", name: "이야기 골목", lat: 37.5714, lng: 126.9979, categories: ["alley"], tags: ["walk", "street"], policy: "outdoor-public", walk: 3 }),
+    mkPlace({ id: "demo-museum-007", name: "예약제 작은 전시", lat: 37.5699, lng: 126.9990, categories: ["heritage"], tags: ["exhibit"], policy: "reservation-only", walk: 4 }),
+    mkPlace({ id: "demo-far-008", name: "먼 곳의 정원", lat: 37.5800, lng: 127.0100, categories: ["park"], tags: ["park"], policy: "outdoor-public", walk: null }),
+  ],
+  missions: [
+    mkMission("demo-bakery-001", "bread", ["문 앞에 밀가루 향이 번지는 작은 가게", "아침마다 줄이 생기는 골목", "간판에 곡식 그림이 있다"]),
+    mkMission("demo-cafe-002", "bread", ["시장 소리와 커피 향이 섞이는 곳", "창가 자리가 유명한 곳", "시장 입구에서 한 블록"]),
+    mkMission("demo-restaurant-003", "food", ["오래된 국물 냄새가 나는 골목", "점심시간마다 붐비는 곳", "좁은 골목 안쪽 모퉁이"]),
+    mkMission("demo-bar-004", "food", ["해가 지면 불이 켜지는 곳", "밤에만 간판이 보이는 곳", "골목 끝 붉은 등"]),
+    mkMission("demo-heritage-005", "heritage", ["담장 너머로 고요함이 느껴지는 곳", "오랜 왕실의 흔적이 남은 곳", "큰 문 앞 넓은 마당"]),
+    mkMission("demo-alley-006", "walk", ["걸어야만 보이는 짧은 골목", "벽에 옛 사진이 걸린 길", "두 갈래가 만나는 곳"]),
+    mkMission("demo-museum-007", "heritage", ["작지만 예약이 필요한 전시", "문 앞 안내판을 확인", "건물 2층 창이 보인다"]),
+    mkMission("demo-far-008", "walk", ["도심 속 숨은 초록", "넓은 잔디가 있는 곳", "먼 길을 가야 한다"]),
+  ],
+};

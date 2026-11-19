@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif;
+  color: #17251e;
+  background: #f2f5ef;
+}
+body { margin: 0; line-height: 1.65; }
+button, a, select, input { min-height: 44px; }
+a.inline-link { min-height: 0; text-decoration: underline; color: #1d5e3e; }
+:focus-visible { outline: 3px solid #1d5e3e; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
