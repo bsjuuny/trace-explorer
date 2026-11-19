@@ -1,5 +1,5 @@
 export const ENGINE_VERSION = "1.1.0";
-export const SCORE_WEIGHTS_VERSION = "w1";
+export const SCORE_WEIGHTS_VERSION = "w2";
 
 export const ENGINE_CONFIG = {
   clueMinutes: 4,
@@ -15,5 +15,6 @@ export const ENGINE_CONFIG = {
   /** 야외 미션 허용 시간대(KST 분). 야간은 보수적으로 제외 */
   outdoorStartMinutes: 6 * 60,
   outdoorEndMinutes: 19 * 60,
-  topN: 5,
+  /** 점수 상위 N곳 중 가중 무작위로 고른다. 점수 차가 작아 5에서 자르면 후보 15곳 중 일부만 영원히 나오므로 8로 넓힘 */
+  topN: 8,
 } as const;

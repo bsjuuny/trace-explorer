@@ -16,7 +16,7 @@ test("어드민: 시뮬레이터는 제외 사유를 보여준다", async ({ pag
   await page.goto(ADMIN);
   await page.getByRole("tab", { name: "미션 시뮬레이터" }).click();
   await page.getByRole("button", { name: "시뮬레이션 실행" }).click();
-  await expect(page.getByText(/후보 8개/)).toBeVisible();
+  await expect(page.getByText(/후보 15개/)).toBeVisible();
   await expect(page.getByRole("cell", { name: /route-unknown/ })).toBeVisible();
   await expect(page.getByRole("cell", { name: /exceeds-duration/ }).first()).toBeVisible();
 });

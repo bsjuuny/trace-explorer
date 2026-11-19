@@ -325,6 +325,328 @@
     {
       "schemaVersion": 1,
       "contentVersion": "2026-11-19.1",
+      "id": "demo-bakery-009",
+      "name": "[데모] 골목 떡집",
+      "coordinates": {
+        "lat": 37.5718,
+        "lng": 126.9996
+      },
+      "categories": [
+        "bakery"
+      ],
+      "tags": [
+        "rice-cake",
+        "local"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 3,
+        "confidence": "approximate"
+      },
+      "extraHint": "새벽에 김이 가장 많이 오르는 곳이에요. 문 옆 작은 시루를 찾아보세요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-cafe-010",
+      "name": "[데모] 옥상 찻집",
+      "coordinates": {
+        "lat": 37.5702,
+        "lng": 126.9998
+      },
+      "categories": [
+        "cafe"
+      ],
+      "tags": [
+        "tea",
+        "rooftop"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "closed-monday",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 3,
+        "confidence": "approximate"
+      },
+      "extraHint": "올려다보면 간판보다 화분이 먼저 보이는 건물이에요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-restaurant-011",
+      "name": "[데모] 곰탕 골목집",
+      "coordinates": {
+        "lat": 37.5714,
+        "lng": 126.9976
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "soup",
+        "lunch"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "daily-day",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 3,
+        "confidence": "approximate"
+      },
+      "extraHint": "점심 줄이 길어서 골목 모퉁이까지 이어져요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-restaurant-012",
+      "name": "[데모] 포장마차 거리",
+      "coordinates": {
+        "lat": 37.5698,
+        "lng": 126.9979
+      },
+      "categories": [
+        "restaurant"
+      ],
+      "tags": [
+        "night",
+        "street-food"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "late-night",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      },
+      "extraHint": "해가 진 뒤에 천막이 하나둘 펼쳐지는 길이에요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-heritage-013",
+      "name": "[데모] 옛 우물터",
+      "coordinates": {
+        "lat": 37.5722,
+        "lng": 126.9978
+      },
+      "categories": [
+        "heritage"
+      ],
+      "tags": [
+        "well",
+        "history"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 80,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      },
+      "extraHint": "바닥의 둥근 돌 표식을 찾아보세요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-alley-014",
+      "name": "[데모] 벽화 골목",
+      "coordinates": {
+        "lat": 37.5705,
+        "lng": 127.0003
+      },
+      "categories": [
+        "alley"
+      ],
+      "tags": [
+        "mural",
+        "street"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      },
+      "extraHint": "고개를 들면 담장 전체가 한 장의 그림이에요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
+      "id": "demo-park-015",
+      "name": "[데모] 작은 쉼터",
+      "coordinates": {
+        "lat": 37.5707,
+        "lng": 126.9969
+      },
+      "categories": [
+        "park"
+      ],
+      "tags": [
+        "bench",
+        "green"
+      ],
+      "source": {
+        "type": "manual",
+        "sourceId": null,
+        "sourceUrl": null,
+        "license": null,
+        "attribution": null,
+        "verificationMethod": null,
+        "verifiedBy": null,
+        "lastCheckedAt": null,
+        "expiresAt": null
+      },
+      "freshness": "unknown",
+      "publication": {
+        "status": "draft",
+        "isDemo": true
+      },
+      "accessPolicyId": "outdoor-public",
+      "checkInPolicy": {
+        "radiusMeters": 60,
+        "maxAccuracyMeters": 80
+      },
+      "missionTemplateIds": [
+        "mystery-discovery-v1"
+      ],
+      "walkEstimate": {
+        "minutes": 4,
+        "confidence": "approximate"
+      },
+      "extraHint": "벤치 세 개와 오래된 나무 한 그루가 전부예요."
+    },
+    {
+      "schemaVersion": 1,
+      "contentVersion": "2026-11-19.1",
       "id": "demo-far-008",
       "name": "[데모] 먼 곳의 정원",
       "coordinates": {
@@ -813,6 +1135,209 @@
         {
           "order": 3,
           "text": "건물 2층 창이 보인다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-bakery-009",
+      "placeId": "demo-bakery-009",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "이른 아침 김이 피어오르는 작은 가게",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "명절 앞두고 줄이 길어지는 곳",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "문 옆에 낡은 시루가 놓여 있다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-cafe-010",
+      "placeId": "demo-cafe-010",
+      "themeId": "bread",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "계단을 올라야 만나는 조용한 찻집",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "창밖으로 지붕들이 내려다보인다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "입구 화분이 간판 대신이다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-restaurant-011",
+      "placeId": "demo-restaurant-011",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "뽀얀 국물 냄새가 골목을 채우는 곳",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "정오 무렵 줄이 가장 길다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "모퉁이를 돌면 바로 나온다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-restaurant-012",
+      "placeId": "demo-restaurant-012",
+      "themeId": "food",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "밤이 되면 모습이 달라지는 길",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "천막 아래 노란 전구가 줄지어 있다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "낮에는 빈 길로 보인다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-heritage-013",
+      "placeId": "demo-heritage-013",
+      "themeId": "heritage",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "오래전 사람들이 물을 길던 자리",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "지금은 돌 표식만 남았다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "바닥의 둥근 윤곽을 찾아라",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-alley-014",
+      "placeId": "demo-alley-014",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "담장이 캔버스가 된 길",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "계절마다 그림이 조금씩 바뀐다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "좁은 길 끝에서 한 번 꺾는다",
+          "difficulty": "easy",
+          "reviewed": false
+        }
+      ],
+      "rewardId": "reward-standard",
+      "safetyReviewed": false,
+      "reviewed": false
+    },
+    {
+      "id": "m-demo-park-015",
+      "placeId": "demo-park-015",
+      "themeId": "walk",
+      "durationMinutes": 15,
+      "clues": [
+        {
+          "order": 1,
+          "text": "건물 사이에 숨어 있는 작은 초록",
+          "difficulty": "hard",
+          "reviewed": false
+        },
+        {
+          "order": 2,
+          "text": "벤치 세 개가 마주 보고 있다",
+          "difficulty": "medium",
+          "reviewed": false
+        },
+        {
+          "order": 3,
+          "text": "큰 나무 아래가 목적지다",
           "difficulty": "easy",
           "reviewed": false
         }

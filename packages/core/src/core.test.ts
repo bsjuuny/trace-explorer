@@ -116,7 +116,8 @@ describe("미스터리 생성 엔진", () => {
     expect(r.meta.expired).toBe(true);
   });
   it("후보가 없으면 먼 장소를 고르지 않고 제안을 돌려준다", () => {
-    const r = generateMystery(baseReq({ themeIds: ["heritage"] }), demoBundle, demoOpts);
+    // 심야에는 야외 장소와 가이드 전용 유산지가 모두 제외된다.
+    const r = generateMystery(baseReq({ themeIds: ["heritage"], localDateTime: "2026-11-19T22:00:00+09:00" }), demoBundle, { allowDemo: true, nowIso: "2026-11-19T22:00:00+09:00" });
     expect(r.status).toBe("none");
     if (r.status === "none") expect(r.suggestions.length).toBeGreaterThan(0);
   });
@@ -354,5 +355,50 @@ describe("미션 단위 후보 평가", () => {
       expect(JSON.stringify(r)).toBe(JSON.stringify(again));
     }
     expect(ids.size).toBe(2);
+  });
+});
+
+describe("데모 콘텐츠 15개", () => {
+  it("장소 15곳·미션 15개, 장소마다 미션과 힌트가 있다", () => {
+    expect(demoBundle.places).toHaveLength(15);
+    expect(demoBundle.missions).toHaveLength(15);
+    for (const p of demoBundle.places) {
+      expect(demoBundle.missions.filter((m) => m.placeId === p.id), p.id).toHaveLength(1);
+      expect(p.extraHint, p.id).toBeTruthy();
+    }
+  });
+  it("낮 시간 15분 코스에서 여러 장소가 골고루 선택된다", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) {
+      const r = generateMystery(baseReq({ randomSeed: `v${i}` }), demoBundle, demoOpts);
+      expect(r.status).toBe("ok");
+      if (r.status === "ok") seen.add(r.place.id);
+    }
+    expect(seen.size).toBeGreaterThanOrEqual(7); // 낮 10:00 적격 후보 10곳 중 상위 8곳 안에서 고른다
+    expect(seen.has("demo-far-008")).toBe(false); // 도보 시간을 모르는 먼 곳은 제외
+    expect(seen.has("demo-museum-007")).toBe(false); // 예약제는 "예약 없음" 조건에서 제외
+  });
+  it("테마마다 낮에 선택 가능한 장소가 있다", () => {
+    for (const t of ["bread", "food", "heritage", "walk"]) {
+      const places = new Set<string>();
+      for (let i = 0; i < 60; i++) {
+        const r = generateMystery(baseReq({ themeIds: [t], randomSeed: `${t}${i}` }), demoBundle, demoOpts);
+        if (r.status === "ok") {
+          expect(r.mission.themeId).toBe(t);
+          places.add(r.place.id);
+        }
+      }
+      // 문화유산은 낮 15분 코스에서 야외 우물터 1곳뿐(고궁형은 도보 7분이라 시간 초과)
+      expect(places.size, t).toBeGreaterThanOrEqual(t === "heritage" ? 1 : 2);
+    }
+  });
+  it("저녁 이후에는 야외 장소가 빠지고 심야 식당류가 나온다", () => {
+    const at = "2026-11-19T21:30:00+09:00";
+    const ids = new Set<string>();
+    for (let i = 0; i < 100; i++) {
+      const r = generateMystery(baseReq({ randomSeed: `n${i}`, localDateTime: at }), demoBundle, { allowDemo: true, nowIso: at });
+      if (r.status === "ok") ids.add(r.place.id);
+    }
+    expect([...ids].every((id) => id === "demo-bar-004" || id === "demo-restaurant-012")).toBe(true);
   });
 });
