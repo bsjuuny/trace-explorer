@@ -11,6 +11,7 @@ export function SettingsScreen() {
   const wipe = useApp((s) => s.wipeEverything);
   const [perm, setPerm] = useState<string>("확인 불가");
   const [confirming, setConfirming] = useState(false);
+  const [wipeBlocked, setWipeBlocked] = useState(false);
 
   useEffect(() => {
     // 브라우저 위치 권한 상태는 동의 상태와 별개로 표시한다(조회만 하며 권한을 요청하지 않는다).
@@ -53,6 +54,11 @@ export function SettingsScreen() {
       <div className="rounded-xl bg-white p-4">
         <h2 className="font-bold">내 기록 삭제</h2>
         <p className="text-sm">도감·XP·동의 기록·진행 중 탐험이 이 기기에서 완전히 삭제돼요. 되돌릴 수 없어요.</p>
+        {wipeBlocked && (
+          <p role="alert" className="mt-2 text-sm text-[#8a4b00]">
+            다른 탭에서 이 앱이 열려 있어 삭제가 완료되지 않았을 수 있어요. 다른 탭을 모두 닫고 다시 시도해 주세요.
+          </p>
+        )}
         {!confirming ? (
           <button className="mt-2 min-h-[44px] rounded-lg bg-[#f6dcd8] px-4 font-semibold text-[#7a1f12]" onClick={() => setConfirming(true)}>
             내 기록 모두 삭제
@@ -62,8 +68,10 @@ export function SettingsScreen() {
             <button
               className="min-h-[44px] rounded-lg bg-[#b3261e] px-4 font-semibold text-white"
               onClick={async () => {
-                await wipe();
+                const r = await wipe();
                 setConfirming(false);
+                // 다른 탭이 이 앱을 열고 있어 삭제가 막혔으면 완료로 안내하지 않는다.
+                if (r.blocked) return setWipeBlocked(true);
                 navigate("consent");
               }}
             >

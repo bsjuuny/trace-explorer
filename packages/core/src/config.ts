@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "1.0.0";
+export const ENGINE_VERSION = "1.1.0";
 export const SCORE_WEIGHTS_VERSION = "w1";
 
 export const ENGINE_CONFIG = {

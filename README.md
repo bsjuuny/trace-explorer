@@ -11,6 +11,8 @@ pnpm install --frozen-lockfile
 pnpm dev            # 사용자 앱 http://127.0.0.1:5173
 pnpm dev:admin      # 로컬 어드민 http://127.0.0.1:5174 (개발 PC 전용)
 pnpm verify         # typecheck → lint → test → data:validate → build
+pnpm data:validate:public   # 게시 산출물이 공개 기준을 통과하는지(배포 직전 점검, 실패 시 exit 1)
+pnpm icons          # PNG 아이콘 재생성(설치된 Chrome 사용)
 pnpm e2e            # Playwright (설치된 Chrome 사용, E2E_CHANNEL=msedge 로 변경 가능)
 ```
 

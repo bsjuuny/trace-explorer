@@ -1,0 +1,13 @@
+# 카페24(Apache) 등 .htaccess를 지원하는 호스팅용 보안 헤더 템플릿.
+# 호스팅이 mod_headers를 지원하는지, CSP 값이 index.html의 meta CSP와 일치하는지 배포 전에 확인한다(카페24 지원 여부 미확인).
+# 지도 스타일(VITE_MAP_STYLE_URL)을 바꾸면 img-src·connect-src도 함께 바꾼다.
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; worker-src 'self' blob:; child-src blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org; connect-src 'self' https://tiles.openfreemap.org; font-src 'self' data:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+  # 서비스 워커·매니페스트는 항상 최신본을 받도록 한다.
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

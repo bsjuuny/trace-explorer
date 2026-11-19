@@ -20,7 +20,9 @@ pnpm verify
 4. 외부 지도 길 안내 버튼은 제거했습니다(2026-11-19 결정). 따라서 앱은 카카오맵을 포함한 어떤 외부 지도 링크도 만들지 않습니다.
 
 ## 3-1. 응답 헤더(권장)
-`index.html`의 meta CSP는 `frame-ancestors`를 적용하지 못합니다. 호스팅이 허용하면(`.htaccess` 등) 다음을 응답 헤더로도 설정합니다: `Content-Security-Policy`(meta와 같은 정책 + `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Permissions-Policy: geolocation=(self)`, 필요 시 `Referrer-Policy: no-referrer`. 헤더 지원 여부는 카페24에서 확인 필요(미확인). 운영 빌드에는 `VITE_ENABLE_QA_PARAMS`를 설정하지 않습니다.
+`index.html`의 meta CSP는 `frame-ancestors`를 적용하지 못합니다. `dist/.htaccess`(원본 `apps/explorer/public/.htaccess`)에 템플릿이 들어 있어 업로드하면 적용을 시도합니다(Apache `mod_headers` 필요, 카페24 지원 여부는 미확인). 설정하는 헤더: `Content-Security-Policy`(meta와 같은 정책 + `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Permissions-Policy: geolocation=(self)`, 필요 시 `Referrer-Policy: no-referrer`. 헤더 지원 여부는 카페24에서 확인 필요(미확인). 운영 빌드에는 `VITE_ENABLE_QA_PARAMS`를 설정하지 않습니다.
+
+업로드 전 `pnpm data:validate:public`로 게시 산출물이 공개 기준을 통과하는지 확인합니다(실패하면 exit 1).
 
 ## 4. 배포 후 점검 (실제 도메인)
 - HTTPS에서 첫 화면·동의·위치 권한 요청이 '내 위치로 탐험' 클릭 전에는 뜨지 않는지(위치 동의가 없으면 지도 위치 버튼도 보이지 않는지)

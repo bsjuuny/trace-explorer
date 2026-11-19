@@ -6,12 +6,18 @@ import type { ZodType } from "zod";
 type Props = { bundle: ContentBundle; setBundle: (b: ContentBundle) => void };
 
 const csv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
-const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+/** 빈 입력은 null, 유한한 숫자만 반영하고 숫자가 아닌 입력은 이전 값을 유지한다(NaN이 null로 조용히 바뀌는 것을 방지). */
+const numOrKeep = (s: string, prev: number | null, min: number, max: number) => {
+  if (s.trim() === "") return null;
+  const n = Number(s);
+  return Number.isFinite(n) && n >= min && n <= max ? n : prev;
+};
 
 export function PlacesTab({ bundle, setBundle }: Props) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [selId, setSelId] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
   const places = bundle.places.filter(
     (p) => (!q || (p.name + p.id + p.tags.join(",")).toLowerCase().includes(q.toLowerCase())) && (!status || p.publication.status === status),
   );
@@ -61,8 +67,8 @@ export function PlacesTab({ bundle, setBundle }: Props) {
             <h3>{sel.id}</h3>
             <F label="이름"><input value={sel.name} onChange={(e) => update(sel.id, (p) => ({ ...p, name: e.target.value }))} /></F>
             <div className="row">
-              <F label="위도"><input value={sel.coordinates.lat ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lat: numOrNull(e.target.value) } }))} /></F>
-              <F label="경도"><input value={sel.coordinates.lng ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lng: numOrNull(e.target.value) } }))} /></F>
+              <F label="위도"><input value={sel.coordinates.lat ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lat: numOrKeep(e.target.value, p.coordinates.lat, -90, 90) } }))} /></F>
+              <F label="경도"><input value={sel.coordinates.lng ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lng: numOrKeep(e.target.value, p.coordinates.lng, -180, 180) } }))} /></F>
               {sel.coordinates.lat !== null && sel.coordinates.lng !== null && (
                 <a href={`https://map.kakao.com/link/map/${encodeURIComponent(sel.name)},${sel.coordinates.lat},${sel.coordinates.lng}`} target="_blank" rel="noopener noreferrer">지도에서 좌표 확인</a>
               )}
@@ -102,7 +108,14 @@ export function PlacesTab({ bundle, setBundle }: Props) {
             </div>
             <F label="추가 힌트(공개, 최대 120자 · 목적지 이름을 직접 말하지 않기)"><input maxLength={120} value={sel.extraHint ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, extraHint: e.target.value === "" ? undefined : e.target.value }))} /></F>
             <F label="관리자 메모(공개 번들에서 제외됨)"><input value={sel.adminNote ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, adminNote: e.target.value }))} /></F>
-            <button className="btn danger" onClick={() => { setBundle({ ...bundle, places: bundle.places.filter((p) => p.id !== sel.id) }); setSelId(null); }}>이 장소 삭제</button>
+            <button className="btn danger" onClick={() => {
+              // 장소를 지우면 그 장소의 미션도 함께 지워 고아 미션이 남지 않게 한다.
+              const orphan = bundle.missions.filter((m) => m.placeId === sel.id).length;
+              setBundle({ ...bundle, places: bundle.places.filter((p) => p.id !== sel.id), missions: bundle.missions.filter((m) => m.placeId !== sel.id) });
+              setSelId(null);
+              setNotice(orphan > 0 ? `장소와 연결된 미션 ${orphan}개도 함께 삭제했습니다.` : "");
+            }}>이 장소 삭제</button>
+            {notice && <p role="status">{notice}</p>}
           </div>
         )}
       </div>
@@ -143,9 +156,17 @@ export function TemplatesTab({ bundle, setBundle }: Props) {
     const exists = items.some((i) => i.id === selId);
     const next = exists ? items.map((i) => (i.id === selId ? v : i)) : [...items, v];
     if (new Set(next.map((i) => i.id)).size !== next.length) return setMsg("중복 ID입니다.");
-    setBundle({ ...bundle, [kind]: next });
+    // id를 바꾸면 그 id를 참조하는 항목도 함께 갱신한다(테마→미션, 보상→미션, 접근 정책→장소).
+    let b: ContentBundle = { ...bundle, [kind]: next };
+    let moved = 0;
+    if (exists && selId && v.id !== selId) {
+      if (kind === "themes") b = { ...b, missions: b.missions.map((m) => (m.themeId === selId ? (moved++, { ...m, themeId: v.id }) : m)) };
+      if (kind === "rewards") b = { ...b, missions: b.missions.map((m) => (m.rewardId === selId ? (moved++, { ...m, rewardId: v.id }) : m)) };
+      if (kind === "accessPolicies") b = { ...b, places: b.places.map((p) => (p.accessPolicyId === selId ? (moved++, { ...p, accessPolicyId: v.id }) : p)) };
+    }
+    setBundle(b);
     setSelId(v.id);
-    setMsg("저장됨(내보내기 전까지 이 화면 메모리에만 있습니다)");
+    setMsg(`저장됨(내보내기 전까지 이 화면 메모리에만 있습니다)${moved > 0 ? ` · 참조 ${moved}건도 새 id로 갱신` : ""}`);
   };
 
   return (

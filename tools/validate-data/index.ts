@@ -1,5 +1,26 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { demoContent } from "@trace/data";
 import { validateBundle } from "./validate";
+
+/**
+ * `--public`: 배포 직전 점검용. 게시 산출물(apps/explorer/public/content/content.json)이 공개 기준을 통과하지 못하면 exit 1.
+ *   (예: CI/배포 단계에서 `pnpm data:validate:public`)
+ */
+if (process.argv.includes("--public")) {
+  const target = resolve(dirname(fileURLToPath(import.meta.url)), "../../apps/explorer/public/content/content.json");
+  if (!existsSync(target)) {
+    console.error(`오류: 게시 산출물이 없습니다: ${target}`);
+    process.exit(1);
+  }
+  const r = validateBundle(JSON.parse(readFileSync(target, "utf8")), { public: true });
+  for (const i of r.issues) console.log(`[${i.level}] ${i.path}: ${i.message}`);
+  const n = r.issues.filter((i) => i.level === "error").length;
+  console.log(`
+공개 기준 검증(게시 산출물): ${n === 0 ? "통과" : `실패(${n}건)`}`);
+  process.exit(n === 0 ? 0 : 1);
+}
 
 /**
  * 저장소의 데모 콘텐츠를 두 기준으로 검사한다.

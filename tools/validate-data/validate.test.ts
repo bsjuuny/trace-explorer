@@ -58,3 +58,63 @@ describe("데이터 검증", () => {
     expect(lines.find((l) => l.startsWith("places"))).toBe("places: +0 -1 ~0");
   });
 });
+
+type Pol = { windows: unknown[]; fees: unknown[]; exceptions: unknown[] };
+describe("운영시간·요금·공개 기준 보강", () => {
+  const msgs = (d: unknown, pub = false) => validateBundle(d, { public: pub }).issues.filter((i) => i.level === "error").map((i) => i.message);
+
+  it("같은 요일·시간이 겹치는 운영시간은 오류", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.windows.push({ days: [1], open: "20:00", close: "23:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const });
+    expect(msgs(d).some((m) => m.includes("겹침"))).toBe(true);
+  });
+  it("겹치지 않는 운영시간은 통과", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.windows = [
+      { days: [1], open: "07:00", close: "12:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const },
+      { days: [1], open: "13:00", close: "21:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const },
+    ];
+    expect(msgs(d)).toEqual([]);
+  });
+  it("자정을 넘기는 운영시간이 다음 날 시작 구간과 겹치면 오류", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.windows = [
+      { days: [1], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const },
+      { days: [2], open: "01:00", close: "05:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const },
+    ];
+    expect(msgs(d).some((m) => m.includes("겹침"))).toBe(true);
+  });
+  it("요금 규칙 중복은 오류", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.fees.push({ feeKrw: 500 });
+    expect(msgs(d).some((m) => m.includes("일반 요금"))).toBe(true);
+    const e = clone(demoContent);
+    const h = e.accessPolicies.find((p) => p.id === "heritage-jongmyo-style")! as unknown as Pol;
+    h.fees.push({ days: [3], feeKrw: 100 });
+    expect(msgs(e).some((m) => m.includes("요일 한정 요금"))).toBe(true);
+  });
+  it("특별 개방 기간이 서로 겹치면 오류", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    const base = { kind: "special-open" as const, open: "10:00", close: "12:00", mode: "free-roam" as const, lastEntryMinutesBeforeClose: 0 };
+    pol.exceptions.push({ ...base, from: "2026-12-01", to: "2026-12-05" }, { ...base, from: "2026-12-05", to: "2026-12-06" });
+    expect(msgs(d).some((m) => m.includes("특별 개방 기간"))).toBe(true);
+  });
+  it("미션 테마와 장소 분류가 어긋나면 경고", () => {
+    const d = clone(demoContent);
+    d.missions[0]!.themeId = "heritage";
+    const w = validateBundle(d, { public: false }).issues.filter((i) => i.level === "warn");
+    expect(w.some((i) => i.message.includes("분류가 겹치지 않음"))).toBe(true);
+  });
+  it("공개 기준: 운영시간 신선도·미션 없는 장소 차단", () => {
+    const d = clone(demoContent);
+    d.missions = d.missions.filter((m) => m.placeId !== d.places[0]!.id);
+    const m = msgs(d, true);
+    expect(m.some((x) => x.includes("미션이 없음"))).toBe(true);
+    expect(m.some((x) => x.includes("운영시간 신선도"))).toBe(true);
+  });
+});

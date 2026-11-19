@@ -50,7 +50,7 @@ self.addEventListener("fetch", (e) => {
         hit ||
         fetch(req).then((res) => {
           // 해시된 에셋·앱 셸 파일만 런타임 캐시에 저장한다(임의 경로 응답 캐시 오염 방지).
-          if (res.ok && res.type === "basic" && /\/(assets\/|manifest\.webmanifest$|icon\.svg$)/.test(url.pathname)) {
+          if (res.ok && res.type === "basic" && /\/(assets\/|manifest\.webmanifest$|icon\.svg$|icon-[\w-]+\.png$|apple-touch-icon\.png$)/.test(url.pathname)) {
             const copy = res.clone();
             caches.open(CACHE_VERSION).then((c) => c.put(req, copy));
           }

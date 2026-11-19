@@ -257,3 +257,102 @@ describe("장소 추가 힌트", () => {
     }
   });
 });
+
+import { Exception as ExceptionSchema } from "@trace/schemas";
+describe("특별 개방 예외(special-open)", () => {
+  const verified = { ...heritage, hoursFreshness: "verified" as const, feeFreshness: "verified" as const };
+  const open = (over: Record<string, unknown> = {}) =>
+    ExceptionSchema.parse({ from: "2026-11-17", to: "2026-11-17", kind: "special-open", open: "10:00", close: "17:00", mode: "free-roam", feeKrw: 0, ...over });
+  const withEx = (...exceptions: ReturnType<typeof open>[]) => ({ ...verified, exceptions });
+
+  it("정기 휴관일(화)에도 특별 개방 시간 안이면 가능", () => {
+    const r = evaluateAccess(withEx(open()), q("2026-11-17T11:00:00+09:00", { allowUnverified: false }));
+    expect(r.reasons).toEqual([]);
+    expect(r.eligibility).toBe("eligible");
+  });
+  it("개방 기간 안이지만 시간 밖이면 운영시간 외", () => {
+    const r = evaluateAccess(withEx(open()), q("2026-11-17T18:00:00+09:00", { allowUnverified: false }));
+    expect(r.eligibility).toBe("ineligible");
+    expect(r.reasons).toContain("outside-hours");
+  });
+  it("시간표가 검증되지 않았으면 특별 개방도 통과시키지 않음", () => {
+    const r = evaluateAccess({ ...withEx(open()), hoursFreshness: "unknown" }, q("2026-11-17T11:00:00+09:00", { allowUnverified: false }));
+    expect(r.eligibility).toBe("unknown");
+  });
+  it("같은 기간의 closed 예외가 항상 우선", () => {
+    const closed = ExceptionSchema.parse({ from: "2026-11-17", to: "2026-11-17", kind: "closed" });
+    const r = evaluateAccess(withEx(open(), closed), q("2026-11-17T11:00:00+09:00", { allowUnverified: false }));
+    expect(r.reasons).toContain("exception-closed");
+  });
+  it("자정을 넘기는 특별 개방: 시작일 다음 날 01:00도 같은 구간", () => {
+    const ex = open({ from: "2026-11-20", to: "2026-11-20", open: "22:00", close: "02:00" });
+    expect(evaluateAccess(withEx(ex), q("2026-11-21T01:00:00+09:00", { allowUnverified: false, stayMinutes: 3 })).eligibility).toBe("eligible");
+    expect(evaluateAccess(withEx(ex), q("2026-11-20T23:00:00+09:00", { allowUnverified: false, stayMinutes: 3 })).eligibility).toBe("eligible");
+    expect(evaluateAccess(withEx(ex), q("2026-11-21T03:00:00+09:00", { allowUnverified: false, stayMinutes: 3 })).eligibility).not.toBe("eligible");
+  });
+  it("입장 마감과 특별 요금 적용", () => {
+    const ex = open({ lastEntryMinutesBeforeClose: 60, feeKrw: 2000 });
+    const late = evaluateAccess(withEx(ex), q("2026-11-17T16:30:00+09:00", { allowUnverified: false, maxAdmissionFeeKrw: 5000 }));
+    expect(late.reasons).toContain("last-entry-passed");
+    const paid = evaluateAccess(withEx(ex), q("2026-11-17T11:00:00+09:00", { allowUnverified: false, maxAdmissionFeeKrw: 1000 }));
+    expect(paid.feeKrw).toBe(2000);
+    expect(paid.reasons).toContain("fee-exceeds-limit");
+  });
+  it("스키마: special-open은 시간·모드 필수, 기간 역전 불가", () => {
+    expect(ExceptionSchema.safeParse({ from: "2026-11-17", to: "2026-11-17", kind: "special-open" }).success).toBe(false);
+    expect(ExceptionSchema.safeParse({ from: "2026-11-18", to: "2026-11-17", kind: "closed" }).success).toBe(false);
+    expect(ExceptionSchema.safeParse({ from: "2026-11-17", to: "2026-11-17", kind: "closed" }).success).toBe(true);
+  });
+});
+
+describe("미션 단위 후보 평가", () => {
+  const bakery = demoBundle.places.find((p) => p.id === "demo-bakery-001")!;
+  const m0 = demoBundle.missions.find((m) => m.placeId === bakery.id)!;
+  const clone = (id: string, themeId: string, reviewed: boolean) => ({
+    ...m0, id, themeId, reviewed, safetyReviewed: reviewed, clues: m0.clues.map((c) => ({ ...c, reviewed })),
+  });
+  const livePlace = {
+    ...bakery,
+    freshness: "verified" as const,
+    publication: { status: "published" as const, isDemo: false },
+    source: { ...bakery.source, expiresAt: "2027-12-31T00:00:00+09:00" },
+  };
+  const liveBundle = (missions: typeof demoBundle.missions) => ({
+    ...demoBundle,
+    expiresAt: "2027-12-31T00:00:00+09:00",
+    places: [livePlace],
+    accessPolicies: demoBundle.accessPolicies.map((p) => ({ ...p, hoursFreshness: "verified" as const, feeFreshness: "verified" as const })),
+    missions,
+  });
+  const live = { allowDemo: false, nowIso: "2026-11-19T10:00:00+09:00" };
+
+  it("미검수 미션이 앞에 있어도 검수된 미션이 선택된다", () => {
+    const r = generateMystery(baseReq(), liveBundle([clone("a-unreviewed", "bread", false), clone("b-reviewed", "bread", true)]), live);
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") expect(r.mission.id).toBe("b-reviewed");
+  });
+  it("검수된 미션이 하나도 없으면 장소가 제외된다", () => {
+    const r = generateMystery(baseReq(), liveBundle([clone("a", "bread", false)]), live);
+    expect(r.status).toBe("none");
+    expect(r.candidates[0]!.exclusions).toContain("mission-not-reviewed");
+  });
+  it("테마는 mission.themeId로 판정한다(같은 장소의 다른 테마 미션은 선택되지 않음)", () => {
+    const b = liveBundle([clone("a-food", "food", true), clone("b-bread", "bread", true)]);
+    for (let i = 0; i < 10; i++) {
+      const r = generateMystery(baseReq({ themeIds: ["bread"], randomSeed: `t${i}` }), b, live);
+      expect(r.status === "ok" && r.mission.id).toBe("b-bread");
+    }
+    expect(generateMystery(baseReq({ themeIds: ["heritage"] }), b, live).status).toBe("none");
+  });
+  it("쓸 수 있는 미션이 여럿이면 시드로 재현 가능하게 고른다", () => {
+    const b = liveBundle([clone("a", "bread", true), clone("b", "bread", true)]);
+    const ids = new Set<string>();
+    for (let i = 0; i < 30; i++) {
+      const r = generateMystery(baseReq({ randomSeed: `x${i}` }), b, live);
+      if (r.status === "ok") ids.add(r.mission.id);
+      const again = generateMystery(baseReq({ randomSeed: `x${i}` }), b, live);
+      expect(JSON.stringify(r)).toBe(JSON.stringify(again));
+    }
+    expect(ids.size).toBe(2);
+  });
+});

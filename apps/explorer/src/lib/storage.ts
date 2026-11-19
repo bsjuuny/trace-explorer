@@ -34,10 +34,29 @@ function open(): Promise<IDBDatabase | null> {
           }
         }
       };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(null);
-      req.onblocked = () => resolve(null);
+      req.onsuccess = () => {
+        const db = req.result;
+        // 다른 탭이 삭제·업그레이드를 요청하면 연결을 닫아 막히지 않게 하고, 다음 접근에서 다시 연다.
+        db.onversionchange = () => {
+          db.close();
+          dbPromise = null;
+        };
+        db.onclose = () => {
+          dbPromise = null;
+        };
+        resolve(db);
+      };
+      // 일시적 실패(탭 경합·차단)가 영구 메모리 모드로 고정되지 않도록 다음 접근에서 재시도한다.
+      req.onerror = () => {
+        dbPromise = null;
+        resolve(null);
+      };
+      req.onblocked = () => {
+        dbPromise = null;
+        resolve(null);
+      };
     } catch {
+      dbPromise = null;
       resolve(null);
     }
   });
@@ -79,17 +98,50 @@ export async function kvDelete(key: string): Promise<void> {
   });
 }
 
-/** 모든 로컬 데이터를 실제로 삭제한다(도감·XP·동의 기록·진행 중 탐험 포함). */
-export async function wipeAll(): Promise<void> {
+/** 여러 키를 한 트랜잭션으로 저장한다(진행도와 세션이 어긋나지 않게). null 값은 삭제. */
+export async function kvSetMany(entries: Record<string, unknown>): Promise<void> {
+  for (const [k, v] of Object.entries(entries)) {
+    if (v === null) memory.delete(k);
+    else memory.set(k, v);
+  }
+  const db = await open();
+  if (!db) return;
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(STORE, "readwrite");
+      const os = tx.objectStore(STORE);
+      for (const [k, v] of Object.entries(entries)) {
+        if (v === null) os.delete(k);
+        else os.put(v, k);
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+      tx.onabort = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
+/**
+ * 모든 로컬 데이터를 실제로 삭제한다(도감·XP·동의 기록·진행 중 탐험 포함).
+ * 다른 탭이 DB를 붙잡고 있어 삭제가 막히면 blocked=true를 돌려주므로, 호출부는 "삭제 완료"로 안내하지 않아야 한다.
+ */
+export async function wipeAll(): Promise<{ blocked: boolean }> {
   memory.clear();
   const db = await open();
   if (db) db.close();
   dbPromise = null;
-  await new Promise<void>((resolve) => {
-    if (typeof indexedDB === "undefined") return resolve();
+  return new Promise((resolve) => {
+    if (typeof indexedDB === "undefined") return resolve({ blocked: false });
+    let blocked = false;
     const req = indexedDB.deleteDatabase(DB_NAME);
-    req.onsuccess = () => resolve();
-    req.onerror = () => resolve();
-    req.onblocked = () => resolve();
+    req.onsuccess = () => resolve({ blocked });
+    req.onerror = () => resolve({ blocked: true });
+    // blocked 이후에도 다른 탭이 닫히면 삭제가 이어서 완료될 수 있으므로 success를 잠시 기다린다.
+    req.onblocked = () => {
+      blocked = true;
+      setTimeout(() => resolve({ blocked: true }), 1500);
+    };
   });
 }

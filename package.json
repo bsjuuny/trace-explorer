@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "data:validate": "tsx tools/validate-data/index.ts",
+    "data:validate:public": "tsx tools/validate-data/index.ts --public",
+    "icons": "tsx tools/gen-icons.ts",
     "data:export": "tsx tools/export-static/index.ts",
     "data:publish": "tsx tools/export-static/publish.ts",
     "build": "pnpm data:export && pnpm --filter @trace/explorer build",

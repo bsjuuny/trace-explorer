@@ -52,6 +52,11 @@ if (existsSync(target)) {
     prev = null; // 손상된 기존 파일: 직전본으로 백업하지 않는다
   }
 }
+// 게시된 실콘텐츠가 이미 있으면 버전은 단조 증가해야 한다(과거 버전으로 되돌리는 게시 차단).
+if (prev && !prev.places.some((pl) => pl.publication.isDemo) && !process.argv.includes("--allow-older-version")) {
+  const cmp = new Intl.Collator("en", { numeric: true }).compare(bundle.contentVersion, prev.contentVersion);
+  if (cmp <= 0) fail(`contentVersion(${bundle.contentVersion})이 현재 게시본(${prev.contentVersion})보다 새로워야 합니다. (의도적이면 --allow-older-version)`);
+}
 console.log("변경 요약:");
 for (const l of summarizeDiff(prev, bundle)) console.log("  " + l);
 

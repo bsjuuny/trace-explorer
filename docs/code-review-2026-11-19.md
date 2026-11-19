@@ -18,21 +18,25 @@ Codex는 첫 두 번의 실행이 리포트 없이 종료되어 업데이트 후
 | 7 | 완료 흐름에 상태 가드 없음, 보상 참조 소실 시 첫 보상으로 대체 | Claude, Codex | `store.ts`: `status==="active"`만 체크인·완료 허용, 보상 참조가 없으면 거부 |
 | 8 | 체크인이 NaN·음수 accuracy·미래 timestamp를 통과 | Claude, Codex | `checkin.ts`: 유한성·범위·미래 시각(+5초 허용) 검사. 테스트 추가 |
 
+## 후속 조치 완료 (같은 날 2차)
+
+| 항목 | 조치 |
+|---|---|
+| `special-open` 예외 규칙 | `Exception`에 `open`·`close`·`mode`(선택 `lastEntryMinutesBeforeClose`·`feeKrw`) 추가, 특별 개방 기간에는 정기 휴관·일반 운영시간을 대체. 시간표가 검증되지 않았으면 통과시키지 않음. `from<=to`, special-open 필수 필드 검증. 테스트 7건 |
+| 미션 선택·테마 불일치 | 후보를 (장소, 미션) 단위로 평가. 테마는 `mission.themeId`, 공개 모드는 검수된 미션만, 여럿이면 시드 난수. 엔진 1.1.0. 테마-장소 분류 불일치는 검증 경고. 테스트 4건 |
+| 중첩 운영시간·요금 | 같은 요일·월에서 겹치는 운영시간, 일반 요금 중복, 요일 한정 요금 중복, 특별 개방 기간 중복을 오류로 차단 |
+| 공개 검증 누락 | 공개 장소의 운영시간·유료 요금 신선도 verified, 장소별 미션 존재, 번들 만료, `publish`의 contentVersion 단조 증가(`--allow-older-version`으로 예외) |
+| 스키마 크기 제한 | 문자열·배열 길이, 체크인 반경·정확도 상한 |
+| 저장소 견고성 | DB 열기 실패 재시도, `versionchange` 시 연결 종료, 삭제 `blocked` 안내, 진행도·세션 단일 트랜잭션 저장 |
+| `data:validate` CI | `pnpm data:validate:public`: 게시 산출물이 공개 기준을 통과하지 못하면 exit 1 |
+| 어드민 | 위·경도 비정상 입력은 이전 값 유지(NaN→null 방지), 장소 삭제 시 연결 미션 함께 삭제, 템플릿 id 변경 시 참조 자동 갱신 |
+| 아이콘 | PNG 192/512, maskable, `apple-touch-icon`(`pnpm icons`로 재생성) |
+| 응답 헤더 | `.htaccess` 템플릿(CSP `frame-ancestors 'none'` 등). 카페24 지원 여부는 미확인 |
+
 ## 미조치(후속 과제)
 
-- **`special-open` 예외 규칙**(3개 모두 지적): 정기 휴무일을 덮지 못하고 `special-open-unverified`로 항상 `unknown`이 된다. 운영시간 표현 방식(스키마)을 정해야 해서 설계 결정이 필요하다.
-- **미션과 테마 불일치, 장소당 첫 미션만 사용**(3개 모두, `engine.ts`): `mission.themeId` 필터와 다중 미션 우선순위 정책이 필요하다. agy는 검수된 미션이 미검수 미션에 밀려 장소가 탈락하는 경우도 지적했다.
-- **공개 검증 누락**(Claude, `validate.ts`): 정책 신선도, 참조 존재, `contentVersion` 단조 증가, 번들 만료의 미래성, `adminNote`가 `data:publish`를 막는 모순.
-- **저장소 견고성**(Codex, agy): 복원 데이터 스키마 검증, 진행도·세션 원자적 저장, `indexedDB.open` 실패 시 `dbPromise` 고정, 도감 삭제가 `onblocked`여도 성공 처리.
-- **중첩 운영시간·요금이 배열 순서에 의존**(Codex, `access.ts`).
-- **지도 위치 버튼이 동의 게이트 우회**(Claude, `MapView.tsx`)와 `legal.ts` 문구 불일치.
-- **`data:validate`는 구조 검증만 통과하면 exit 0**(Codex): 데모 데이터가 공개 기준을 통과하지 못하는 것이 현재 설계라 유지했다. 실콘텐츠 게시 시 공개 검증을 CI 단계로 분리할 것.
-- **어드민**: 루프백 바인딩에만 의존, 템플릿 id 변경 시 참조 고아화, 위·경도 `NaN`이 null로 변환(Claude, Codex, agy).
-- **문서 불일치**: 같은 날 갱신 완료. `architecture.md`·`status.md`·`qa-checklist.md`의 카카오 SDK 서술을 OpenFreeMap 기준으로 정정, `status.md`의 서비스 워커 서술을 현재 동작에 맞춤, README·배포 문서에 `data:export` 가드와 QA 파라미터 제한 반영, 매니페스트 아이콘 부재는 `status.md` 한계에 기재. 아이콘 자체(PNG·maskable·apple-touch-icon)는 미조치.
-- **테스트 공백**: `apps/**` 단위 테스트 없음, `exceptions`·월 경계·전날 시작 구간·`lastEntry`·요금 우선순위·`publish.ts` CLI 테스트 없음.
-
-## 운영 메모
-
-- 실콘텐츠를 게시한 뒤 데모로 되돌리려면 `pnpm data:export --force`.
-- QA 파라미터가 필요한 빌드는 `VITE_ENABLE_QA_PARAMS=true`로 만든다(운영 배포 금지).
-- 서비스 워커는 이제 빌드마다 캐시 이름이 바뀌므로, 배포 후 재방문자는 업데이트 안내를 받는다.
+- **클라이언트 `content.json` 해시·서명 검증**: 같은 출처의 해시 파일은 호스팅 탈취에 거의 도움이 되지 않아 보류. 별도 신뢰 경로(서명 키)가 필요하다.
+- **`apps/**` 단위 테스트, 서비스 워커·`publish.ts` CLI 테스트**: 현재는 E2E에 의존. `publish.ts`는 대상 경로가 고정이라 임시 디렉터리 테스트를 위해 경로 주입 리팩터링이 필요하다.
+- **`import-places`**: 외부 데이터 호출 승인 후 구현.
+- **React 19·TypeScript 7·ESLint 10 등 메이저 업그레이드**: 취약점과 무관, 호환성 검증이 필요해 보류.
+- **세션 GPS 출발점 복원**: 좌표를 저장하지 않는 개인정보 원칙과 충돌해 의도적으로 구현하지 않음.

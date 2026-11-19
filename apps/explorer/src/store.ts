@@ -6,7 +6,7 @@ import {
 import type { ContentBundle, Mission, MissionCandidate, MysteryRequest, Place } from "@trace/schemas";
 import { loadContent } from "./lib/content";
 import { CONSENT_VERSION } from "./lib/legal";
-import { kvDelete, kvGet, kvSet, wipeAll } from "./lib/storage";
+import { kvDelete, kvGet, kvSet, kvSetMany, wipeAll } from "./lib/storage";
 
 /** 이 거리보다 멀면 내 위치를 출발점으로 쓰지 않는다(시범 지역은 종로5가 도보권). */
 const FAR_FROM_SERVICE_AREA_M = 3000;
@@ -64,7 +64,7 @@ type State = {
   tryCheckIn: () => Promise<boolean>;
   completeSelfReported: () => void;
   clearSession: () => void;
-  wipeEverything: () => Promise<void>;
+  wipeEverything: () => Promise<{ blocked: boolean }>;
 };
 
 /** QA용: #/?seed=abc&now=2026-11-19T10:00:00+09:00 로 시드·현재시각을 고정한다. */
@@ -77,7 +77,6 @@ function qaParams(): { seed?: string; now?: string } {
   return { seed: p.get("seed") ?? undefined, now: p.get("now") ?? undefined };
 }
 
-const persistProgress = (p: ProgressState) => void kvSet("progress", p);
 const persistSession = (s: Session | null) => void (s ? kvSet("session", s) : kvDelete("session"));
 
 /** 저장된 세션의 장소·미션을 현재 번들의 같은 id 항목으로 교체한다. 형식이 틀리거나 id가 없으면 세션을 버린다. */
@@ -254,8 +253,9 @@ export const useApp = create<State>((set, get) => ({
   },
 
   async wipeEverything() {
-    await wipeAll();
+    const r = await wipeAll();
     set({ consent: null, progress: emptyProgress(), session: null, checkIn: { state: "idle" } });
+    return r;
   },
 }));
 
@@ -274,6 +274,6 @@ function finish(method: "checked-in" | "self-reported") {
     completion: { method, granted: out.granted, duplicate: out.duplicate },
   };
   useApp.setState({ progress: out.state, session: next, checkIn: { state: "idle" } });
-  persistProgress(out.state);
-  persistSession(next);
+  // 진행도와 세션은 한 트랜잭션으로 저장해 XP와 완료 화면이 어긋나지 않게 한다.
+  void kvSetMany({ progress: out.state, session: next });
 }

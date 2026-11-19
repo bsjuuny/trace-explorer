@@ -1,4 +1,4 @@
-import type { AccessPolicy, Eligibility } from "@trace/schemas";
+import type { AccessPolicy, Eligibility, Exception, OpeningWindow } from "@trace/schemas";
 import { hhmmToMinutes, toSeoul } from "./time";
 
 export type AccessQuery = {
@@ -17,24 +17,22 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
   const t = toSeoul(q.arrivalIso);
   const reasons: string[] = [];
 
-  // 특별 휴관/개방 예외는 최우선
+  // 특별 휴관은 최우선. 특별 개방은 해당 기간의 정기 휴관·운영시간을 대체한다.
   for (const ex of policy.exceptions) {
-    if (t.date >= ex.from && t.date <= ex.to) {
-      if (ex.kind === "closed") return { eligibility: "ineligible", reasons: ["exception-closed"], feeKrw: null };
-      reasons.push("special-open-unverified");
+    if (ex.kind === "closed" && t.date >= ex.from && t.date <= ex.to) {
+      return { eligibility: "ineligible", reasons: ["exception-closed"], feeKrw: null };
     }
   }
+  const special = findSpecialOpen(policy.exceptions, t.date, t.minutes);
 
-  const fee = resolveFee(policy, t.dow);
+  const fee = special?.fee ?? resolveFee(policy, t.dow);
 
   if (policy.publicOutdoor) {
     // 외부 공공구역: 시간표 없이 가능. 요금은 0으로 취급.
-    return reasons.length
-      ? { eligibility: "unknown", reasons, feeKrw: 0 }
-      : { eligibility: "eligible", reasons: [], feeKrw: 0 };
+    return { eligibility: "eligible", reasons: [], feeKrw: 0 };
   }
 
-  if (policy.closedDays.includes(t.dow)) {
+  if (!special?.coversDate && policy.closedDays.includes(t.dow)) {
     return { eligibility: "ineligible", reasons: ["closed-day"], feeKrw: fee };
   }
 
@@ -42,7 +40,7 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
     return { eligibility: "unknown", reasons: [...reasons, `hours-${policy.hoursFreshness}`], feeKrw: fee };
   }
 
-  const win = findWindow(policy, t.dow, t.month, t.minutes);
+  const win = special ? special.win : findWindow(policy, t.dow, t.month, t.minutes);
   if (!win) return { eligibility: "ineligible", reasons: [...reasons, "outside-hours"], feeKrw: fee };
 
   const closeMin = hhmmToMinutes(win.window.close);
@@ -83,6 +81,38 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
   }
   if (reasons.length) return { eligibility: "unknown", reasons, feeKrw: fee };
   return { eligibility: "eligible", reasons: [], feeKrw: fee };
+}
+
+/**
+ * 도착 시각이 특별 개방 기간에 속하는지 판정한다. 기간 안이면 그 예외의 시간만 쓰고(시간 밖이면 win=null),
+ * 자정을 넘기는 구간은 전날이 기간에 속할 때 자정 이후 도착도 같은 구간으로 본다.
+ */
+function findSpecialOpen(
+  exceptions: Exception[],
+  date: string,
+  minutes: number,
+): { win: { window: OpeningWindow; fromPreviousDay: boolean } | null; fee: number | null; coversDate: boolean } | null {
+  const prevDate = new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+  const toWindow = (e: Exception): OpeningWindow => ({
+    days: [0, 1, 2, 3, 4, 5, 6],
+    open: e.open!,
+    close: e.close!,
+    lastEntryMinutesBeforeClose: e.lastEntryMinutesBeforeClose,
+    mode: e.mode!,
+  });
+  let covered: Exception | null = null;
+  for (const e of exceptions) {
+    if (e.kind !== "special-open" || !e.open || !e.close || !e.mode) continue;
+    const o = hhmmToMinutes(e.open);
+    const c = hhmmToMinutes(e.close);
+    const crosses = c <= o;
+    const today = date >= e.from && date <= e.to;
+    if (today && minutes >= o && (crosses || minutes < c)) return { win: { window: toWindow(e), fromPreviousDay: false }, fee: e.feeKrw ?? null, coversDate: true };
+    if (crosses && prevDate >= e.from && prevDate <= e.to && minutes < c) return { win: { window: toWindow(e), fromPreviousDay: true }, fee: e.feeKrw ?? null, coversDate: true };
+    if (today && !covered) covered = e;
+  }
+  // 기간 안이지만 개방 시간 밖
+  return covered ? { win: null, fee: covered.feeKrw ?? null, coversDate: true } : null;
 }
 
 function resolveFee(policy: AccessPolicy, dow: number): number | null {

@@ -30,10 +30,10 @@ Critical은 없다(agy는 content.json 런타임 검증 누락을 Critical로 �
 
 - **클라이언트의 `content.json` 변조 방어**: 브라우저는 구조 스키마만 검사한다. 호스팅 계정 탈취나 업로드 단계 변조를 막으려면 산출물 해시·서명 검증이 필요하다(Codex·agy·Claude 공통 제안). 이번에는 빌드·게시 단계 검증만 강화했다.
 - **체크인·XP는 본질적으로 클라이언트 신뢰**: DevTools 위치 모의나 저장소 직접 수정은 막을 수 없다. XP를 쿠폰 등 실제 가치가 있는 보상에 연결하려면 서버 검증(영수증·현장 QR)이 필요하다.
-- **CSP가 meta에만 있음**: `frame-ancestors`(클릭재킹 방어)는 meta에서 무시된다. 카페24에서 응답 헤더로 `Content-Security-Policy`(`frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Permissions-Policy: geolocation=(self)`, 필요 시 `Referrer-Policy: no-referrer`를 설정해야 한다(배포 단계 작업).
+- **CSP가 meta에만 있음**: `frame-ancestors`(클릭재킹 방어)는 meta에서 무시된다. `apps/explorer/public/.htaccess`에 헤더 템플릿을 추가했으나(CSP `frame-ancestors 'none'`, nosniff, Permissions-Policy) 카페24가 `mod_headers`를 허용하는지 미확인이다. 불가하면 카페24에서 응답 헤더로 `Content-Security-Policy`(`frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Permissions-Policy: geolocation=(self)`, 필요 시 `Referrer-Policy: no-referrer`를 설정해야 한다(배포 단계 작업).
 - **지도 타일의 제3자 노출**: 타일 요청으로 IP와 보는 영역이 OpenFreeMap에 전달된다. 개인정보 처리방침 확정 전 네트워크 캡처 확인 또는 자체 호스팅(PMTiles)을 검토한다.
 - **의존성**: 같은 날 업그레이드 완료. `pnpm audit`이 16건(critical 3, high 2, moderate 10, low 1)을 보고해서 vite 5.4→7.3.8, vitest 2.1→4.1.12, zod 3.25→4.6.7로 올렸고 재감사 결과 알려진 취약점 0건이다. `pnpm verify`·`pnpm e2e`(14건) 통과. 나머지 메이저 뒤처짐(react 18, typescript 5.9, eslint 9 등)은 취약점과 무관해 유지했다.
-- **스키마 크기 제한 없음**: 변조된 대형 배열·문자열로 브라우저가 멈출 수 있다. `.max()` 제한과 응답 크기 제한을 추가해야 한다(Codex).
+- **스키마 크기 제한**: 같은 날 2차로 문자열·배열 길이 상한을 추가했다. 응답 크기 제한은 호스팅 설정이라 미조치.
 - **어드민 인증 없음**: loopback 바인딩과 `allowedHosts`에만 의존한다. 원격 사용이 필요하면 인증을 도입한다.
 - **QA 파라미터 빌드**: `VITE_ENABLE_QA_PARAMS=true` 빌드를 배포하면 `now` 조작으로 운영 시간 판정을 우회할 수 있다. 배포 파이프라인에서 이 변수가 설정되지 않았는지 확인한다.
 - **어드민 CSP는 `unsafe-inline` 허용**: vite 개발 서버의 인라인 스크립트 때문이다.

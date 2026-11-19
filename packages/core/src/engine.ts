@@ -63,17 +63,21 @@ export function generateMystery(req: MysteryRequest, bundle: ContentBundle, opts
   };
 
   const policies = new Map<string, AccessPolicy>(bundle.accessPolicies.map((p) => [p.id, p]));
-  const themeCats = themeCategoryFilter(req, bundle);
+  const themeIds = requestedThemeIds(req, bundle);
   const now = toSeoul(req.localDateTime);
 
-  const missionByPlace = new Map<string, Mission>();
+  // 장소별 미션 목록(시간 조건만 적용). 테마·검수 조건은 usableMissions에서 후보 단위로 판정한다.
+  const missionsByPlace = new Map<string, Mission[]>();
   for (const m of bundle.missions) {
-    if (!missionByPlace.has(m.placeId) && m.durationMinutes <= req.durationMinutes) missionByPlace.set(m.placeId, m);
+    if (m.durationMinutes > req.durationMinutes) continue;
+    const list = missionsByPlace.get(m.placeId) ?? [];
+    list.push(m);
+    missionsByPlace.set(m.placeId, list);
   }
 
   // 안정 정렬을 위해 id 순
   const places = [...bundle.places].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const candidates = places.map((place) => evaluatePlace(place, req, policies, missionByPlace, themeCats, opts, now.minutes));
+  const candidates = places.map((place) => evaluatePlace(place, req, policies, missionsByPlace, themeIds, opts, now.minutes));
 
   if (expired && !opts.allowDemo) {
     return { status: "none", candidates, suggestions: ["content-expired"], meta };
@@ -88,25 +92,36 @@ export function generateMystery(req: MysteryRequest, bundle: ContentBundle, opts
   const rng = makeRng(seed);
   const pick = weightedPick(top, top.map((c) => c.score), rng) ?? top[0]!;
   const place = bundle.places.find((p) => p.id === pick.placeId)!;
-  const mission = missionByPlace.get(pick.placeId)!;
+  // 같은 장소에 쓸 수 있는 미션이 여럿이면 시드 난수로 고른다(같은 시드면 같은 결과).
+  const usable = usableMissions(missionsByPlace.get(place.id) ?? [], themeIds, opts.allowDemo).missions;
+  const mission = usable[Math.floor(rng() * usable.length)] ?? usable[0]!;
   return { status: "ok", mission, place, selected: pick, candidates, meta };
 }
 
-function themeCategoryFilter(req: MysteryRequest, bundle: ContentBundle): Set<string> | null {
+/** 요청한 테마 id 집합(활성 테마만). 요청이 없으면 null(모든 미션 대상). */
+function requestedThemeIds(req: MysteryRequest, bundle: ContentBundle): Set<string> | null {
   if (!req.themeIds || req.themeIds.length === 0) return null;
-  const cats = new Set<string>();
-  for (const t of bundle.themes) {
-    if (t.active && req.themeIds.includes(t.id)) t.categories.forEach((c) => cats.add(c));
-  }
-  return cats;
+  const ids = new Set<string>();
+  for (const t of bundle.themes) if (t.active && req.themeIds.includes(t.id)) ids.add(t.id);
+  return ids;
+}
+
+/** 후보 미션: 요청 테마와 일치(mission.themeId)하고, 공개 모드에서는 검수가 끝난 것만. 탈락 사유도 돌려준다. */
+function usableMissions(list: Mission[], themeIds: Set<string> | null, allowDemo: boolean): { missions: Mission[]; reason: string | null } {
+  if (list.length === 0) return { missions: [], reason: "no-mission" };
+  const byTheme = themeIds ? list.filter((m) => themeIds.has(m.themeId)) : list;
+  if (byTheme.length === 0) return { missions: [], reason: "theme-mismatch" };
+  const reviewed = allowDemo ? byTheme : byTheme.filter((m) => m.reviewed && m.safetyReviewed && m.clues.every((c) => c.reviewed));
+  if (reviewed.length === 0) return { missions: [], reason: "mission-not-reviewed" };
+  return { missions: reviewed, reason: null };
 }
 
 function evaluatePlace(
   place: Place,
   req: MysteryRequest,
   policies: Map<string, AccessPolicy>,
-  missions: Map<string, Mission>,
-  themeCats: Set<string> | null,
+  missions: Map<string, Mission[]>,
+  themeIds: Set<string> | null,
   opts: EngineOptions,
   nowMinutes: number,
 ): MissionCandidate {
@@ -142,18 +157,9 @@ function evaluatePlace(
     return base("unknown");
   }
 
-  if (themeCats && !place.categories.some((c) => themeCats.has(c))) {
-    ex.push("theme-mismatch");
-    return base("ineligible");
-  }
-
-  const mission = missions.get(place.id);
-  if (!mission) {
-    ex.push("no-mission");
-    return base("ineligible");
-  }
-  if (!opts.allowDemo && (!mission.reviewed || !mission.safetyReviewed || mission.clues.some((c) => !c.reviewed))) {
-    ex.push("mission-not-reviewed");
+  const usable = usableMissions(missions.get(place.id) ?? [], themeIds, opts.allowDemo);
+  if (usable.reason) {
+    ex.push(usable.reason);
     return base("ineligible");
   }
 
