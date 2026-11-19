@@ -54,6 +54,7 @@ if (existsSync(target)) {
 }
 // 게시된 실콘텐츠가 이미 있으면 버전은 단조 증가해야 한다(과거 버전으로 되돌리는 게시 차단).
 if (prev && !prev.places.some((pl) => pl.publication.isDemo) && !process.argv.includes("--allow-older-version")) {
+  // 형식이 YYYY-MM-DD(.N)로 고정되어 있어 숫자 인식 비교가 곧 시간 순서다.
   const cmp = new Intl.Collator("en", { numeric: true }).compare(bundle.contentVersion, prev.contentVersion);
   if (cmp <= 0) fail(`contentVersion(${bundle.contentVersion})이 현재 게시본(${prev.contentVersion})보다 새로워야 합니다. (의도적이면 --allow-older-version)`);
 }

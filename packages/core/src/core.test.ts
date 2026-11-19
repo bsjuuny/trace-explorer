@@ -402,3 +402,54 @@ describe("데모 콘텐츠 15개", () => {
     expect([...ids].every((id) => id === "demo-bar-004" || id === "demo-restaurant-012")).toBe(true);
   });
 });
+
+describe("자정을 넘기는 구간: 요일·월 경계", () => {
+  const mk = (over: Record<string, unknown>) => ({
+    ...lateNight, hoursFreshness: "verified" as const, feeFreshness: "verified" as const, closedDays: [] as number[], exceptions: [],
+    windows: [{ days: [0, 1, 2, 3, 4, 5, 6], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const }],
+    ...over,
+  });
+  const at = (policy: ReturnType<typeof mk>, iso: string) => evaluateAccess(policy, q(iso, { allowUnverified: false, stayMinutes: 3 }));
+
+  it("12월 한정 22:00~02:00 구간은 1월 1일 01:00에도 이어진다", () => {
+    const p = mk({ windows: [{ days: [0, 1, 2, 3, 4, 5, 6], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [12] }] });
+    expect(at(p, "2026-12-31T23:00:00+09:00").eligibility).toBe("eligible");
+    expect(at(p, "2027-01-01T01:00:00+09:00").eligibility).toBe("eligible");
+    expect(at(p, "2027-01-01T23:00:00+09:00").eligibility).toBe("ineligible"); // 1월 저녁은 12월 한정 구간 밖
+  });
+  it("1월 한정 구간은 12월 31일 시작분의 새벽을 열지 않는다", () => {
+    const p = mk({ windows: [{ days: [0, 1, 2, 3, 4, 5, 6], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [1] }] });
+    expect(at(p, "2027-01-01T01:00:00+09:00").eligibility).toBe("ineligible");
+    expect(at(p, "2027-01-01T23:00:00+09:00").eligibility).toBe("eligible");
+  });
+  it("월요일 휴관인 곳도 일요일 밤에 시작한 영업은 월요일 새벽까지 이어진다", () => {
+    const p = mk({ closedDays: [1] });
+    expect(at(p, "2026-11-23T01:00:00+09:00").eligibility).toBe("eligible"); // 11-23 월요일 새벽(전날 일요일 시작)
+    expect(at(p, "2026-11-23T23:00:00+09:00").eligibility).toBe("ineligible"); // 월요일 저녁은 휴관
+  });
+  it("전날(시작일)이 휴관일이면 그 구간의 새벽도 닫힌다", () => {
+    const p = mk({ closedDays: [0] }); // 일요일 휴관
+    expect(at(p, "2026-11-23T01:00:00+09:00").eligibility).toBe("ineligible"); // 월요일 새벽(일요일 시작 구간)
+  });
+});
+
+describe("엔진: 비활성 테마·미션 순서", () => {
+  const base = demoBundle;
+  it("비활성 테마의 미션은 테마를 지정하지 않아도 선택되지 않는다", () => {
+    const b = { ...base, themes: base.themes.map((t) => (t.id === "food" ? { ...t, active: false } : t)) };
+    for (let i = 0; i < 80; i++) {
+      const r = generateMystery(baseReq({ randomSeed: `i${i}` }), b, demoOpts);
+      if (r.status === "ok") expect(r.mission.themeId).not.toBe("food");
+    }
+  });
+  it("미션 배열 순서가 바뀌어도 같은 시드는 같은 미션을 고른다", () => {
+    const m0 = base.missions.find((m) => m.placeId === "demo-bakery-001")!;
+    const extra = { ...m0, id: "m-demo-bakery-001-b" };
+    const only = (ms: typeof base.missions) => ({ ...base, places: base.places.filter((p) => p.id === "demo-bakery-001"), missions: ms });
+    for (let i = 0; i < 20; i++) {
+      const a = generateMystery(baseReq({ randomSeed: `o${i}` }), only([m0, extra]), demoOpts);
+      const b = generateMystery(baseReq({ randomSeed: `o${i}` }), only([extra, m0]), demoOpts);
+      expect(a.status === "ok" && b.status === "ok" && a.mission.id === b.mission.id).toBe(true);
+    }
+  });
+});

@@ -24,6 +24,11 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
     }
   }
   const special = findSpecialOpen(policy.exceptions, t.date, t.minutes);
+  // 전날 시작해 자정을 넘기는 구간은 전날의 요일·월로 판정한다(월 경계·휴관일 모두).
+  const prevDate = new Date(Date.parse(`${t.date}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+  const prevMonth = Number(prevDate.slice(5, 7));
+  const prevDow = (t.dow + 6) % 7;
+  const regular = special ? null : findWindow(policy, t.dow, t.month, prevMonth, t.minutes);
 
   const fee = special?.fee ?? resolveFee(policy, t.dow);
 
@@ -32,7 +37,12 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
     return { eligibility: "eligible", reasons: [], feeKrw: 0 };
   }
 
-  if (!special?.coversDate && policy.closedDays.includes(t.dow)) {
+  // 오늘이 휴관일이어도 전날부터 이어지는 영업(자정 이후)이면 영업 중이다. 그 구간은 시작일의 휴관 여부로 판정한다.
+  const continuesFromPrev = !!regular?.fromPreviousDay;
+  if (!special?.coversDate && !continuesFromPrev && policy.closedDays.includes(t.dow)) {
+    return { eligibility: "ineligible", reasons: ["closed-day"], feeKrw: fee };
+  }
+  if (continuesFromPrev && policy.closedDays.includes(prevDow)) {
     return { eligibility: "ineligible", reasons: ["closed-day"], feeKrw: fee };
   }
 
@@ -40,7 +50,7 @@ export function evaluateAccess(policy: AccessPolicy, q: AccessQuery): AccessResu
     return { eligibility: "unknown", reasons: [...reasons, `hours-${policy.hoursFreshness}`], feeKrw: fee };
   }
 
-  const win = special ? special.win : findWindow(policy, t.dow, t.month, t.minutes);
+  const win = special ? special.win : regular;
   if (!win) return { eligibility: "ineligible", reasons: [...reasons, "outside-hours"], feeKrw: fee };
 
   const closeMin = hhmmToMinutes(win.window.close);
@@ -123,16 +133,16 @@ function resolveFee(policy: AccessPolicy, dow: number): number | null {
   return general ? general.feeKrw : null;
 }
 
-function findWindow(policy: AccessPolicy, dow: number, month: number, minutes: number) {
-  const inMonth = (w: { months?: number[] | undefined }) => !w.months || w.months.includes(month);
+function findWindow(policy: AccessPolicy, dow: number, month: number, prevMonth: number, minutes: number) {
+  const inMonth = (w: { months?: number[] | undefined }, m: number) => !w.months || w.months.includes(m);
   for (const w of policy.windows) {
-    if (!inMonth(w)) continue;
     const o = hhmmToMinutes(w.open);
     const c = hhmmToMinutes(w.close);
     const crosses = c <= o;
-    if (w.days.includes(dow) && minutes >= o && (crosses || minutes < c)) return { window: w, fromPreviousDay: false };
+    if (inMonth(w, month) && w.days.includes(dow) && minutes >= o && (crosses || minutes < c)) return { window: w, fromPreviousDay: false };
+    // 전날 시작 구간은 시작일(전날)의 월로 적용 여부를 판정한다(12/31 밤 → 1/1 새벽).
     const prev = (dow + 6) % 7;
-    if (crosses && w.days.includes(prev) && minutes < c) return { window: w, fromPreviousDay: true };
+    if (crosses && inMonth(w, prevMonth) && w.days.includes(prev) && minutes < c) return { window: w, fromPreviousDay: true };
   }
   return null;
 }

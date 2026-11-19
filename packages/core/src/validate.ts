@@ -18,15 +18,18 @@ const span = (w: { open: string; close: string }): [number, number] => {
 
 /** 두 운영시간이 같은 요일·월에서 시간이 겹치는지(자정 넘김 포함). 우선순위 없이 겹치면 배열 순서에 결과가 달라진다. */
 function windowsOverlap(a: OpeningWindow, b: OpeningWindow): boolean {
-  if (a.months && b.months && !a.months.some((m) => b.months!.includes(m))) return false;
   const [ao, ac] = span(a);
   const [bo, bc] = span(b);
-  if (a.days.some((d) => b.days.includes(d)) && ao < bc && bo < ac) return true;
+  const sameMonth = !a.months || !b.months || a.months.some((m) => b.months!.includes(m));
+  if (sameMonth && a.days.some((d) => b.days.includes(d)) && ao < bc && bo < ac) return true;
   // 한쪽이 자정을 넘기면 다음 날 이른 시간대가 다른 쪽 시작과 겹칠 수 있다.
+  // 꼬리는 다음 날 새벽이므로 달이 바뀔 수 있다(12월 → 1월). y가 x의 시작 월 또는 그 다음 달에 적용되면 겹침 후보다.
+  const monthsTouch = (x: OpeningWindow, y: OpeningWindow) =>
+    !x.months || !y.months || x.months.some((m) => y.months!.includes(m) || y.months!.includes((m % 12) + 1));
   const tail = (x: OpeningWindow, y: OpeningWindow) => {
     const [xo, xc] = span(x);
     const [yo] = span(y);
-    return xc > 1440 && x.days.some((d) => y.days.includes((d + 1) % 7)) && yo < xc - 1440 && yo >= 0 && xo >= 0;
+    return xc > 1440 && monthsTouch(x, y) && x.days.some((d) => y.days.includes((d + 1) % 7)) && yo < xc - 1440 && yo >= 0 && xo >= 0;
   };
   return tail(a, b) || tail(b, a);
 }

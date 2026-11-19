@@ -77,7 +77,7 @@ export const demoContent = {
     mkPlace({ id: "demo-heritage-005", name: "고궁형 유산지", lat: 37.5726, lng: 126.9971, categories: ["heritage"], tags: ["heritage", "history"], policy: "heritage-jongmyo-style", walk: 7, radius: 100, hint: "정문을 마주 보고 오른쪽 돌담을 따라가 보세요." }),
     mkPlace({ id: "demo-alley-006", name: "이야기 골목", lat: 37.5714, lng: 126.9979, categories: ["alley"], tags: ["walk", "street"], policy: "outdoor-public", walk: 3, hint: "자동차가 들어갈 수 없을 만큼 좁아요. 벽을 눈높이로 살펴보세요." }),
     mkPlace({ id: "demo-museum-007", name: "예약제 작은 전시", lat: 37.5699, lng: 126.9990, categories: ["heritage"], tags: ["exhibit"], policy: "reservation-only", walk: 4, hint: "문 앞 안내판의 예약 문구를 먼저 읽어 보세요." }),
-    mkPlace({ id: "demo-bakery-009", name: "골목 떡집", lat: 37.5718, lng: 126.9996, categories: ["bakery"], tags: ["rice-cake", "local"], policy: "daily-day", walk: 3, hint: "새벽에 김이 가장 많이 오르는 곳이에요. 문 옆 작은 시루를 찾아보세요." }),
+    mkPlace({ id: "demo-bakery-009", name: "골목 떡집", lat: 37.5718, lng: 126.9996, categories: ["bakery"], tags: ["rice-cake", "local"], policy: "daily-day", walk: 3, hint: "이른 아침에 김이 가장 많이 오르는 곳이에요. 문 옆 작은 시루를 찾아보세요." }),
     mkPlace({ id: "demo-cafe-010", name: "옥상 찻집", lat: 37.5702, lng: 126.9998, categories: ["cafe"], tags: ["tea", "rooftop"], policy: "closed-monday", walk: 3, hint: "올려다보면 간판보다 화분이 먼저 보이는 건물이에요." }),
     mkPlace({ id: "demo-restaurant-011", name: "곰탕 골목집", lat: 37.5714, lng: 126.9976, categories: ["restaurant"], tags: ["soup", "lunch"], policy: "daily-day", walk: 3, hint: "점심 줄이 길어서 골목 모퉁이까지 이어져요." }),
     mkPlace({ id: "demo-restaurant-012", name: "포장마차 거리", lat: 37.5698, lng: 126.9979, categories: ["restaurant"], tags: ["night", "street-food"], policy: "late-night", walk: 4, hint: "해가 진 뒤에 천막이 하나둘 펼쳐지는 길이에요." }),

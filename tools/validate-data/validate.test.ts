@@ -87,6 +87,31 @@ describe("운영시간·요금·공개 기준 보강", () => {
     ];
     expect(msgs(d).some((m) => m.includes("겹침"))).toBe(true);
   });
+  it("월 경계를 넘는 자정 꼬리(12월 → 1월)가 겹치면 오류", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.windows = [
+      { days: [0, 1, 2, 3, 4, 5, 6], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [12] },
+      { days: [0, 1, 2, 3, 4, 5, 6], open: "01:00", close: "05:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [1] },
+    ];
+    expect(msgs(d).some((m) => m.includes("겹침"))).toBe(true);
+  });
+  it("달이 서로 다르고 인접하지 않으면 겹치지 않는다", () => {
+    const d = clone(demoContent);
+    const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;
+    pol.windows = [
+      { days: [0, 1, 2, 3, 4, 5, 6], open: "22:00", close: "02:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [6] },
+      { days: [0, 1, 2, 3, 4, 5, 6], open: "01:00", close: "05:00", lastEntryMinutesBeforeClose: 0, mode: "free-roam" as const, months: [1] },
+    ];
+    expect(msgs(d)).toEqual([]);
+  });
+  it("콘텐츠 버전 형식은 YYYY-MM-DD(.N)만 허용", () => {
+    const ok = clone(demoContent);
+    expect(validateBundle(ok, { public: false }).bundle).not.toBeNull();
+    const bad = clone(demoContent);
+    (bad as { contentVersion: string }).contentVersion = "v1.0.0-rc.1";
+    expect(validateBundle(bad, { public: false }).bundle).toBeNull();
+  });
   it("요금 규칙 중복은 오류", () => {
     const d = clone(demoContent);
     const pol = d.accessPolicies.find((p) => p.id === "daily-day")! as unknown as Pol;

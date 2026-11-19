@@ -98,22 +98,23 @@ export function generateMystery(req: MysteryRequest, bundle: ContentBundle, opts
   return { status: "ok", mission, place, selected: pick, candidates, meta };
 }
 
-/** 요청한 테마 id 집합(활성 테마만). 요청이 없으면 null(모든 미션 대상). */
-function requestedThemeIds(req: MysteryRequest, bundle: ContentBundle): Set<string> | null {
-  if (!req.themeIds || req.themeIds.length === 0) return null;
+/** 후보로 허용하는 테마 id 집합. 항상 활성 테마만 포함하고, 요청한 테마가 있으면 그 교집합이다(비활성 테마 미션은 "전체"에서도 제외). */
+function requestedThemeIds(req: MysteryRequest, bundle: ContentBundle): Set<string> {
   const ids = new Set<string>();
-  for (const t of bundle.themes) if (t.active && req.themeIds.includes(t.id)) ids.add(t.id);
+  const only = req.themeIds && req.themeIds.length > 0 ? req.themeIds : null;
+  for (const t of bundle.themes) if (t.active && (!only || only.includes(t.id))) ids.add(t.id);
   return ids;
 }
 
 /** 후보 미션: 요청 테마와 일치(mission.themeId)하고, 공개 모드에서는 검수가 끝난 것만. 탈락 사유도 돌려준다. */
-function usableMissions(list: Mission[], themeIds: Set<string> | null, allowDemo: boolean): { missions: Mission[]; reason: string | null } {
+function usableMissions(list: Mission[], themeIds: Set<string>, allowDemo: boolean): { missions: Mission[]; reason: string | null } {
   if (list.length === 0) return { missions: [], reason: "no-mission" };
-  const byTheme = themeIds ? list.filter((m) => themeIds.has(m.themeId)) : list;
+  const byTheme = list.filter((m) => themeIds.has(m.themeId));
   if (byTheme.length === 0) return { missions: [], reason: "theme-mismatch" };
   const reviewed = allowDemo ? byTheme : byTheme.filter((m) => m.reviewed && m.safetyReviewed && m.clues.every((c) => c.reviewed));
   if (reviewed.length === 0) return { missions: [], reason: "mission-not-reviewed" };
-  return { missions: reviewed, reason: null };
+  // 배열 순서와 무관하게 같은 시드가 같은 결과를 내도록 id 순으로 고정한다.
+  return { missions: [...reviewed].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)), reason: null };
 }
 
 function evaluatePlace(
@@ -121,7 +122,7 @@ function evaluatePlace(
   req: MysteryRequest,
   policies: Map<string, AccessPolicy>,
   missions: Map<string, Mission[]>,
-  themeIds: Set<string> | null,
+  themeIds: Set<string>,
   opts: EngineOptions,
   nowMinutes: number,
 ): MissionCandidate {

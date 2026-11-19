@@ -2,7 +2,8 @@
 const CACHE_VERSION = "trace-__BUILD_ID__"; // 빌드 시 해시로 치환(vite 플러그인)
 const CONTENT_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 오래된 운영정보를 무기한 보여주지 않는다
 const PRECACHE = "__PRECACHE__"; // 빌드 시 해시된 JS/CSS 경로 JSON으로 치환
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"].concat(PRECACHE.startsWith("__") ? [] : JSON.parse(PRECACHE));
+const NAV_TIMEOUT_MS = 4000; // 신호가 약해도 캐시된 앱 셸이 있으면 이 시간 안에 보여준다
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"].concat(PRECACHE.startsWith("__") ? [] : JSON.parse(PRECACHE));
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(SHELL)));
@@ -30,18 +31,8 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   if (req.mode === "navigate") {
-    // index.html은 network-first: 새 배포가 재방문자에게 전달되도록 한다.
-    e.respondWith(
-      fetch(req).then((res) => {
-        // 정상 HTML 문서 응답만 index.html로 캐시한다(리다이렉트·타 Content-Type·오류 응답 제외).
-        const isHtml = (res.headers.get("content-type") || "").includes("text/html");
-        if (res.ok && res.type === "basic" && !res.redirected && isHtml) {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put("./index.html", copy));
-        }
-        return res;
-      }).catch(() => caches.match("./index.html").then((h) => h || caches.match("./"))),
-    );
+    // index.html은 network-first: 새 배포가 재방문자에게 전달되도록 한다. 느리거나 실패(5xx 포함)하면 캐시로 폴백한다.
+    e.respondWith(navigate(req));
     return;
   }
   e.respondWith(
@@ -79,4 +70,23 @@ async function contentNetworkFirst(req) {
   const at = hit ? Number(hit.headers.get("x-cached-at") || 0) : 0;
   if (hit && Date.now() - at < CONTENT_MAX_AGE_MS) return hit;
   return new Response("stale-or-offline", { status: 503 });
+}
+
+async function navigate(req) {
+  const cached = () => caches.match("./index.html").then((h) => h || caches.match("./"));
+  const network = fetch(req).then(async (res) => {
+    // 정상 HTML 문서 응답만 index.html로 캐시한다(리다이렉트·타 Content-Type·오류 응답 제외).
+    const isHtml = (res.headers.get("content-type") || "").includes("text/html");
+    if (res.ok && res.type === "basic" && !res.redirected && isHtml) {
+      const copy = res.clone();
+      caches.open(CACHE_VERSION).then((c) => c.put("./index.html", copy));
+      return res;
+    }
+    if (res.ok) return res; // 문서가 아닌 정상 응답(예: 다른 형식)은 그대로 전달
+    const hit = await cached();
+    return hit || res; // 5xx·4xx면 캐시된 셸을 우선
+  });
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), NAV_TIMEOUT_MS)).then(async () => (await cached()) || network);
+  // 네트워크가 먼저 끝나면 그것을, 느리면(타임아웃) 캐시된 셸을 쓰되 캐시가 없으면 네트워크를 계속 기다린다.
+  return Promise.race([network.catch(async () => (await cached()) || Response.error()), timeout]);
 }

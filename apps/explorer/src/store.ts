@@ -79,16 +79,42 @@ function qaParams(): { seed?: string; now?: string } {
 
 const persistSession = (s: Session | null) => void (s ? kvSet("session", s) : kvDelete("session"));
 
-/** 저장된 세션의 장소·미션을 현재 번들의 같은 id 항목으로 교체한다. 형식이 틀리거나 id가 없으면 세션을 버린다. */
-function rebuildSession(raw: Session | null | undefined, bundle: ContentBundle): Session | null {
-  if (!raw || typeof raw !== "object") return null;
-  const status = raw.status;
+const isRec = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * 저장된 세션을 검증해 복원한다. 장소·미션은 현재 번들의 같은 id 항목으로 교체하고, 나머지 필드는 형식·범위를 확인한다.
+ * 형식이 틀리거나 참조(미션↔장소)가 맞지 않거나 id가 번들에 없으면 세션을 버린다.
+ */
+function rebuildSession(raw: unknown, bundle: ContentBundle): Session | null {
+  if (!isRec(raw)) return null;
+  const { status, startedAt, cluesShown, extraHint, destRevealed, selected, meta, completion } = raw;
   if (status !== "active" && status !== "completed" && status !== "ended") return null;
-  if (typeof raw.startedAt !== "string" || typeof raw.cluesShown !== "number" || !raw.mission || !raw.place) return null;
-  const mission = bundle.missions.find((m) => m.id === raw.mission.id);
-  const place = bundle.places.find((p) => p.id === raw.place.id);
-  if (!mission || !place) return null;
-  return { ...raw, mission, place };
+  if (typeof startedAt !== "string" || Number.isNaN(Date.parse(startedAt))) return null;
+  if (typeof extraHint !== "boolean" || typeof destRevealed !== "boolean") return null;
+  const rawMission = raw["mission"];
+  const rawPlace = raw["place"];
+  if (!isRec(rawMission) || !isRec(rawPlace)) return null;
+  const mission = bundle.missions.find((m) => m.id === rawMission["id"]);
+  const place = bundle.places.find((p) => p.id === rawPlace["id"]);
+  if (!mission || !place || mission.placeId !== place.id) return null;
+  if (typeof cluesShown !== "number" || !Number.isInteger(cluesShown) || cluesShown < 1 || cluesShown > mission.clues.length) return null;
+  if (!isRec(selected) || selected["placeId"] !== place.id) return null;
+  if (!isRec(meta) || typeof meta["engineVersion"] !== "string" || typeof meta["seed"] !== "string") return null;
+  let comp: Session["completion"];
+  if (completion !== undefined) {
+    if (!isRec(completion) || (completion["method"] !== "checked-in" && completion["method"] !== "self-reported")) return null;
+    if (typeof completion["granted"] !== "number" || !Number.isFinite(completion["granted"]) || completion["granted"] < 0) return null;
+    if (typeof completion["duplicate"] !== "boolean") return null;
+    comp = { method: completion["method"], granted: completion["granted"], duplicate: completion["duplicate"] };
+  }
+  if ((status === "completed") !== (comp !== undefined)) return null;
+  return {
+    mission, place,
+    selected: selected as unknown as Session["selected"],
+    meta: meta as unknown as Session["meta"],
+    startedAt, cluesShown, extraHint, destRevealed, status,
+    ...(comp ? { completion: comp } : {}),
+  };
 }
 
 export const useApp = create<State>((set, get) => ({
@@ -254,7 +280,8 @@ export const useApp = create<State>((set, get) => ({
 
   async wipeEverything() {
     const r = await wipeAll();
-    set({ consent: null, progress: emptyProgress(), session: null, checkIn: { state: "idle" } });
+    // 다른 탭 때문에 삭제가 막혔으면 화면 상태를 그대로 두어 사용자가 경고를 보고 다시 시도할 수 있게 한다.
+    if (!r.blocked) set({ consent: null, progress: emptyProgress(), session: null, checkIn: { state: "idle" } });
     return r;
   },
 }));

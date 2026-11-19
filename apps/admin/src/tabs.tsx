@@ -6,12 +6,30 @@ import type { ZodType } from "zod";
 type Props = { bundle: ContentBundle; setBundle: (b: ContentBundle) => void };
 
 const csv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
-/** 빈 입력은 null, 유한한 숫자만 반영하고 숫자가 아닌 입력은 이전 값을 유지한다(NaN이 null로 조용히 바뀌는 것을 방지). */
-const numOrKeep = (s: string, prev: number | null, min: number, max: number) => {
-  if (s.trim() === "") return null;
-  const n = Number(s);
-  return Number.isFinite(n) && n >= min && n <= max ? n : prev;
-};
+/**
+ * 좌표 입력: 입력 중인 문자열(예: "37.", "-")은 로컬로 유지하고, 유효한 숫자일 때만 값에 반영한다.
+ * 숫자가 아니거나 범위 밖이면 이전 값을 유지하고(NaN이 null로 조용히 바뀌지 않음), 포커스를 잃으면 확정된 값으로 되돌린다.
+ */
+function CoordInput({ value, min, max, onChange }: { value: number | null; min: number; max: number; onChange: (v: number | null) => void }) {
+  const [text, setText] = useState(value === null ? "" : String(value));
+  const [bad, setBad] = useState(false);
+  return (
+    <input
+      value={text}
+      aria-invalid={bad}
+      onChange={(e) => {
+        const s = e.target.value;
+        setText(s);
+        if (s.trim() === "") { setBad(false); return onChange(null); }
+        const n = Number(s);
+        const ok = Number.isFinite(n) && n >= min && n <= max;
+        setBad(!ok);
+        if (ok) onChange(n);
+      }}
+      onBlur={() => { setText(value === null ? "" : String(value)); setBad(false); }}
+    />
+  );
+}
 
 export function PlacesTab({ bundle, setBundle }: Props) {
   const [q, setQ] = useState("");
@@ -54,7 +72,7 @@ export function PlacesTab({ bundle, setBundle }: Props) {
           <thead><tr><th>ID</th><th>이름</th><th>상태</th><th>신선도</th></tr></thead>
           <tbody>
             {places.map((p) => (
-              <tr key={p.id} className={p.id === selId ? "sel" : ""} onClick={() => setSelId(p.id)} style={{ cursor: "pointer" }}>
+              <tr key={p.id} className={p.id === selId ? "sel" : ""} onClick={() => { setSelId(p.id); setNotice(""); }} style={{ cursor: "pointer" }}>
                 <td>{p.id}</td><td>{p.name}</td><td>{p.publication.status}{p.publication.isDemo ? " (데모)" : ""}</td><td>{p.freshness}</td>
               </tr>
             ))}
@@ -67,8 +85,8 @@ export function PlacesTab({ bundle, setBundle }: Props) {
             <h3>{sel.id}</h3>
             <F label="이름"><input value={sel.name} onChange={(e) => update(sel.id, (p) => ({ ...p, name: e.target.value }))} /></F>
             <div className="row">
-              <F label="위도"><input value={sel.coordinates.lat ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lat: numOrKeep(e.target.value, p.coordinates.lat, -90, 90) } }))} /></F>
-              <F label="경도"><input value={sel.coordinates.lng ?? ""} onChange={(e) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lng: numOrKeep(e.target.value, p.coordinates.lng, -180, 180) } }))} /></F>
+              <F label="위도(-90~90)"><CoordInput key={`lat-${sel.id}`} value={sel.coordinates.lat} min={-90} max={90} onChange={(v) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lat: v } }))} /></F>
+              <F label="경도(-180~180)"><CoordInput key={`lng-${sel.id}`} value={sel.coordinates.lng} min={-180} max={180} onChange={(v) => update(sel.id, (p) => ({ ...p, coordinates: { ...p.coordinates, lng: v } }))} /></F>
               {sel.coordinates.lat !== null && sel.coordinates.lng !== null && (
                 <a href={`https://map.kakao.com/link/map/${encodeURIComponent(sel.name)},${sel.coordinates.lat},${sel.coordinates.lng}`} target="_blank" rel="noopener noreferrer">지도에서 좌표 확인</a>
               )}
@@ -195,7 +213,16 @@ export function TemplatesTab({ bundle, setBundle }: Props) {
               const dup = { ...JSON.parse(safe(text)), id: `${selId}-copy` };
               setSelId(null); setText(JSON.stringify(dup, null, 2)); setMsg("복제본: 저장하면 추가됩니다");
             }}>복제</button>
-            <button className="btn danger" disabled={!selId} onClick={() => { setBundle({ ...bundle, [kind]: items.filter((i) => i.id !== selId) }); setSelId(null); setText(""); }}>삭제</button>
+            <button className="btn danger" disabled={!selId} onClick={() => {
+              // 다른 항목이 참조 중이면 삭제를 막아 고아 참조를 만들지 않는다.
+              const refs =
+                kind === "themes" ? bundle.missions.filter((m) => m.themeId === selId).length
+                : kind === "rewards" ? bundle.missions.filter((m) => m.rewardId === selId).length
+                : kind === "accessPolicies" ? bundle.places.filter((pl) => pl.accessPolicyId === selId).length
+                : 0;
+              if (refs > 0) return setMsg(`삭제할 수 없습니다: 현재 ${refs}개 항목이 이 ${KIND_LABEL[kind]}을(를) 참조하고 있습니다. 참조를 먼저 바꾸거나 삭제하세요.`);
+              setBundle({ ...bundle, [kind]: items.filter((i) => i.id !== selId) }); setSelId(null); setText(""); setMsg("삭제했습니다.");
+            }}>삭제</button>
           </div>
           {msg && <p role="status">{msg}</p>}
         </div>

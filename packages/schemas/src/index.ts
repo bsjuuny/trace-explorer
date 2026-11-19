@@ -31,6 +31,9 @@ export const Source = z.object({
 });
 
 /** HH:MM, 종료가 시작보다 작거나 같으면 자정을 넘기는 구간으로 해석 */
+/** 콘텐츠 버전: YYYY-MM-DD 또는 YYYY-MM-DD.N(예: 2026-11-19.2). 형식을 고정해 게시 시 버전 비교가 모호하지 않게 한다. */
+export const ContentVersion = z.string().regex(/^\d{4}-\d{2}-\d{2}(\.\d+)?$/, "버전은 YYYY-MM-DD 또는 YYYY-MM-DD.N 형식");
+
 const Hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 export const AccessMode = z.enum(["free-roam", "timed", "guided", "reservation-required", "unknown"]);
@@ -100,7 +103,7 @@ export type AccessPolicy = z.infer<typeof AccessPolicy>;
 
 export const Place = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
-  contentVersion: z.string(),
+  contentVersion: ContentVersion,
   id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/).max(80),
   name: z.string().min(1).max(100),
   coordinates: Coordinates,
@@ -172,7 +175,7 @@ export type Clue = z.infer<typeof Clue>;
 
 export const ContentBundle = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
-  contentVersion: z.string().max(40),
+  contentVersion: ContentVersion,
   /** 이 시각 이후엔 신규 탐험을 경고/차단 */
   expiresAt: IsoDateTime,
   places: z.array(Place).max(2000),
